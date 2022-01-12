@@ -70,6 +70,8 @@ pub struct Config {
     pub port: u16,
     /// Number of threads to use for executing futures. **(default: `num_cores`)**
     pub workers: usize,
+    /// Number of threads to use for executing blocking futures. **(default: `512`)**
+    pub blocking_workers: usize,
     /// How, if at all, to identify the server via the `Server` header.
     /// **(default: `"Rocket"`)**
     pub ident: Ident,
@@ -167,6 +169,7 @@ impl Config {
             address: Ipv4Addr::new(127, 0, 0, 1).into(),
             port: 8000,
             workers: num_cpus::get(),
+            blocking_workers: 512,
             ident: Ident::default(),
             limits: Limits::default(),
             temp_dir: std::env::temp_dir().into(),
@@ -355,6 +358,7 @@ impl Config {
         launch_info_!("address: {}", bold(&self.address));
         launch_info_!("port: {}", bold(&self.port));
         launch_info_!("workers: {}", bold(self.workers));
+        launch_info_!("blocking_workers: {}", bold(self.blocking_workers));
         launch_info_!("ident: {}", bold(&self.ident));
         launch_info_!("limits: {}", bold(&self.limits));
         launch_info_!("temp dir: {}", bold(&self.temp_dir.relative().display()));
@@ -446,6 +450,9 @@ impl Config {
 
     /// The stringy parameter name for setting/extracting [`Config::workers`].
     pub const WORKERS: &'static str = "workers";
+
+    /// The stringy parameter name for setting/extracting [`Config::blocking_workers`].
+    pub const BLOCKING_WORKERS: &'static str = "blocking_workers";
 
     /// The stringy parameter name for setting/extracting [`Config::keep_alive`].
     pub const KEEP_ALIVE: &'static str = "keep_alive";
