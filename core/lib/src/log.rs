@@ -1,6 +1,7 @@
 //! Rocket's logging infrastructure.
 
 use std::fmt;
+use std::io::{self, Write};
 use std::str::FromStr;
 use std::sync::atomic::{AtomicBool, Ordering};
 
@@ -34,6 +35,31 @@ define_log_macro!(debug, debug_);
 define_log_macro!(trace, trace_);
 define_log_macro!(launch_info: warn, "rocket::launch", $);
 define_log_macro!(launch_info_: warn, "rocket::launch_", $);
+
+// print macro panics on not available stdout, this shouldn't
+// https://github.com/SergioBenitez/Rocket/issues/2019
+macro_rules! print_no_panic {
+    ($($arg:tt)*) => ({
+        write!(io::stdout(), "{}", format_args!($($arg)*))
+        .unwrap_or_else(|e| {
+            // fire and forget now
+            let _ = io::stdout().write(e.to_string().as_bytes());
+        });
+    })
+}
+
+// println macro panics on not available stdout, this shouldn't
+// https://github.com/SergioBenitez/Rocket/issues/2019
+macro_rules! println_no_panic {
+    () => (print_no_panic!("\n"));
+    ($($arg:tt)*) => ({
+        write!(io::stdout(), "{}\n", format_args!($($arg)*))
+        .unwrap_or_else(|e| {
+            // fire and forget now
+            let _ = io::stdout().write(e.to_string().as_bytes());
+        });
+    })
+}
 
 #[derive(Debug)]
 struct RocketLogger;
@@ -86,7 +112,7 @@ impl log::Log for RocketLogger {
         // In Rocket, we abuse targets with suffix "_" to indicate indentation.
         let indented = record.target().ends_with('_');
         if indented {
-            print!("   {} ", Paint::default(">>").bold());
+            print_no_panic!("   {} ", Paint::default(">>").bold());
         }
 
         // Downgrade a physical launch `warn` to logical `info`.
@@ -96,30 +122,34 @@ impl log::Log for RocketLogger {
 
         match level {
             log::Level::Error if !indented => {
-                println!("{} {}",
-                         Paint::red("Error:").bold(),
-                         Paint::red(record.args()).wrap())
+                println_no_panic!(
+                    "{} {}",
+                    Paint::red("Error:").bold(),
+                    Paint::red(record.args()).wrap()
+                );
             }
             log::Level::Warn if !indented => {
-                println!("{} {}",
-                         Paint::yellow("Warning:").bold(),
-                         Paint::yellow(record.args()).wrap())
+                println_no_panic!(
+                    "{} {}",
+                    Paint::yellow("Warning:").bold(),
+                    Paint::yellow(record.args()).wrap()
+                );
             }
-            log::Level::Info => println!("{}", Paint::blue(record.args()).wrap()),
-            log::Level::Trace => println!("{}", Paint::magenta(record.args()).wrap()),
-            log::Level::Warn => println!("{}", Paint::yellow(record.args()).wrap()),
-            log::Level::Error => println!("{}", Paint::red(record.args()).wrap()),
+            log::Level::Info => println_no_panic!("{}", Paint::blue(record.args()).wrap()),
+            log::Level::Trace => println_no_panic!("{}", Paint::magenta(record.args()).wrap()),
+            log::Level::Warn => println_no_panic!("{}", Paint::yellow(record.args()).wrap()),
+            log::Level::Error => println_no_panic!("{}", Paint::red(record.args()).wrap()),
             log::Level::Debug => {
-                print!("\n{} ", Paint::blue("-->").bold());
+                print_no_panic!("\n{} ", Paint::blue("-->").bold());
                 if let Some(file) = record.file() {
-                    print!("{}", Paint::blue(file));
+                    print_no_panic!("{}", Paint::blue(file));
                 }
 
                 if let Some(line) = record.line() {
-                    println!(":{}", Paint::blue(line));
+                    println_no_panic!(":{}", Paint::blue(line));
                 }
 
-                println!("\t{}", record.args());
+                println_no_panic!("\t{}", record.args());
             }
         }
     }
