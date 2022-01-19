@@ -105,7 +105,7 @@ if [ "${PACKAGES_ALREADY_INSTALLED}" != "true" ]; then
     # Install man pages - package name varies between 3.12 and earlier versions
     if apk info man > /dev/null 2>&1; then
         apk add --no-cache man man-pages
-    else 
+    else
         apk add --no-cache mandoc man-pages
     fi
 
@@ -121,12 +121,12 @@ fi
 group_name="${USERNAME}"
 if id -u ${USERNAME} > /dev/null 2>&1; then
     # User exists, update if needed
-    if [ "${USER_GID}" != "automatic" ] && [ "$USER_GID" != "$(id -g $USERNAME)" ]; then 
+    if [ "${USER_GID}" != "automatic" ] && [ "$USER_GID" != "$(id -g $USERNAME)" ]; then
         group_name="$(id -gn $USERNAME)"
         groupmod --gid $USER_GID ${group_name}
         usermod --gid $USER_GID $USERNAME
     fi
-    if [ "${USER_UID}" != "automatic" ] && [ "$USER_UID" != "$(id -u $USERNAME)" ]; then 
+    if [ "${USER_UID}" != "automatic" ] && [ "$USER_UID" != "$(id -u $USERNAME)" ]; then
         usermod --uid $USER_UID $USERNAME
     fi
 else
@@ -136,7 +136,7 @@ else
     else
         groupadd --gid $USER_GID $USERNAME
     fi
-    if [ "${USER_UID}" = "automatic" ]; then 
+    if [ "${USER_UID}" = "automatic" ]; then
         useradd -s /bin/bash --gid $USERNAME -m $USERNAME
     else
         useradd -s /bin/bash -K MAIL_DIR=/dev/null --uid $USER_UID --gid $USERNAME -m $USERNAME
@@ -151,7 +151,7 @@ if [ "${USERNAME}" != "root" ] && [ "${EXISTING_NON_ROOT_USER}" != "${USERNAME}"
 fi
 
 # ** Shell customization section **
-if [ "${USERNAME}" = "root" ]; then 
+if [ "${USERNAME}" = "root" ]; then
     user_rc_path="/root"
 else
     user_rc_path="/home/${USERNAME}"
@@ -178,9 +178,9 @@ fi
 # Set the default git editor if not already set
 if [ -z "$(git config --get core.editor)" ] && [ -z "${GIT_EDITOR}" ]; then
     if  [ "${TERM_PROGRAM}" = "vscode" ]; then
-        if [[ -n $(command -v code-insiders) &&  -z $(command -v code) ]]; then 
+        if [[ -n $(command -v code-insiders) &&  -z $(command -v code) ]]; then
             export GIT_EDITOR="code-insiders --wait"
-        else 
+        else
             export GIT_EDITOR="code --wait"
         fi
     fi
@@ -245,7 +245,7 @@ codespaces_zsh="$(cat \
 # Codespaces zsh prompt theme
 __zsh_prompt() {
     local prompt_username
-    if [ ! -z "${GITHUB_USER}" ]; then 
+    if [ ! -z "${GITHUB_USER}" ]; then
         prompt_username="@${GITHUB_USER}"
     else
         prompt_username="%n"

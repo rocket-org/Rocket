@@ -68,7 +68,7 @@ RUN echo "Cloning Rocket Github repository..." ; \
     [ -d "${ROCKET_VOLUME}/.git" ] \
     && echo "Directory \"${ROCKET_VOLUME}\" exists... skipping clone." ; \
     [ ! -d "${ROCKET_VOLUME}/.git" ] \
-    && { git clone "${ROCKET_REPO}" || exit 1 ; } ; \ 
+    && { git clone "${ROCKET_REPO}" || exit 1 ; } ; \
     exit 0
 
 VOLUME /home/rocket/Rocket
