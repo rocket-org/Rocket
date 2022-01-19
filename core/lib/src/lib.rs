@@ -29,7 +29,7 @@
 //!
 //! ```toml
 //! [dependencies]
-//! rocket = "0.5.0-rc.1"
+//! rocket = "0.5.0-rc.2"
 //! ```
 //!
 //! <small>Note that development versions, tagged with `-dev`, are not published
@@ -72,7 +72,7 @@
 //!
 //! ```toml
 //! [dependencies]
-//! rocket = { version = "0.5.0-rc.1", features = ["secrets", "tls", "json"] }
+//! rocket = { version = "0.5.0-rc.2", features = ["secrets", "tls", "json"] }
 //! ```
 //!
 //! [JSON (de)serialization]: crate::serde::json
