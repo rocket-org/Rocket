@@ -20,7 +20,7 @@ RUN echo "Updating packages..." \
     && echo "Executing common-alpine.sh..." \
     && ash /tmp/library-scripts/common-alpine.sh "${INSTALL_ZSH}" "${USERNAME}" "${USER_UID}" "${USER_GID}" \
     && rm -rf /tmp/library-scripts \
-    && usermod -p $(echo "$RANDOM-x-$RANDOM-x-$RANDOM-x-$RANDOM-x-$RANDOM" | hexdump -e '"%02x"') rocket \
+    && usermod -p $(echo "$RANDOM-x-$RANDOM-x-$RANDOM-x-$RANDOM-x-$RANDOM" | hexdump -e '"%02x"') "${USERNAME}" \
     && echo "" > /etc/motd \
     && echo "Installing required packages..." \
     && apk add -U --no-cache bash cmake gcc lldb make musl-dev \
@@ -75,15 +75,24 @@ VOLUME /home/rocket/Rocket
 
 RUN echo "Installing tools with cargo..." \
     && source $HOME/.cargo/env \
-    && cargo +stable install sccache \
+    || exit 1 ; \
+    no_sccache_cleanup=0 ; \
+    [ -d "$HOME/.cache/sccache" ] \
+    && no_sccache_cleanup=1 ; \
+    cargo +stable install sccache \
     && echo "Config sccache..." \
     && echo -e "\n[build]\nrustc-wrapper = \"$HOME/.cargo/bin/sccache\"" >> $HOME/.cargo/config.toml \
+    && echo "Cargo installing..." \
     && cargo +stable install cargo-audit cargo-binutils cargo-cache cargo-crev cargo-duplicates \
             cargo-expand cargo-license cargo-msrv cargo-outdated cargo-trim cargo-update \
             drill fd-find flamegraph sd \
-    && cargo +stable trim -a \
-    && rm -r /home/rocket/.cache/sccache/* \
-    && exit 0
+    && echo "Cleanup..." \
+    && cargo +stable cache -a \
+    || exit 1 ; \
+    [ "$no_sccache_cleanup" -ne 1 ] \
+    && rm -r $HOME/.cache/sccache/* \
+    || exit 1 ; \
+    exit 0
 
 VOLUME /home/rocket/.cache/sccache
 
