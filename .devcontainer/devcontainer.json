@@ -1,34 +1,34 @@
 // For format details, see https://aka.ms/devcontainer.json. For config options, see the README at:
 // https://github.com/microsoft/vscode-dev-containers/tree/v0.209.6/containers/alpine
 {
-	"name": "Rocket-Alpine-3_15",
-	"build": {
-		"dockerfile": "Dockerfile",
-		// Update 'VARIANT' to pick an Alpine version: 3.12, 3.13, 3.14, 3.15
-		"args": { "VARIANT": "3.15" }
-	},
-	
-	// Set *default* container specific settings.json values on container create. 
-	"settings": {},
+    "name": "Rocket-Alpine-3_15",
+    "build": {
+        "dockerfile": "Dockerfile",
+        // Update 'VARIANT' to pick an Alpine version: 3.12, 3.13, 3.14, 3.15
+        "args": { "VARIANT": "3.15" }
+    },
 
-	// Add the IDs of extensions you want installed when the container is created.
-	// Note that some extensions may not work in Alpine Linux. See https://aka.ms/vscode-remote/linux.
-	"extensions": [
-		"ms-vscode-remote.remote-containers",
-		"matklad.rust-analyzer",
-		"serayuzgur.crates",
-		"vadimcn.vscode-lldb"
-	],
+    // Set *default* container specific settings.json values on container create. 
+    "settings": {},
 
-	// Use 'forwardPorts' to make a list of ports inside the container available locally.
-	"forwardPorts": [2222, 8000],
+    // Add the IDs of extensions you want installed when the container is created.
+    // Note that some extensions may not work in Alpine Linux. See https://aka.ms/vscode-remote/linux.
+    "extensions": [
+        "ms-vscode-remote.remote-containers",
+        "matklad.rust-analyzer",
+        "serayuzgur.crates",
+        "vadimcn.vscode-lldb"
+    ],
 
-	// Use 'postCreateCommand' to run commands after the container is created.
-	// "postCreateCommand": "uname -a",
+    // Use 'forwardPorts' to make a list of ports inside the container available locally.
+    "forwardPorts": [2222, 8000],
 
-	// Replace when using a ptrace-based debugger like C++, Go, and Rust
-	// "runArgs": [ "--init", "--cap-add=SYS_PTRACE", "--security-opt", "seccomp=unconfined" ],
+    // Use 'postCreateCommand' to run commands after the container is created.
+    // "postCreateCommand": "uname -a",
 
-	// Comment out connect as root instead. More info: https://aka.ms/vscode-remote/containers/non-root.
-	"remoteUser": "rocket"
+    // Replace when using a ptrace-based debugger like C++, Go, and Rust
+    // "runArgs": [ "--init", "--cap-add=SYS_PTRACE", "--security-opt", "seccomp=unconfined" ],
+
+    // Comment out connect as root instead. More info: https://aka.ms/vscode-remote/containers/non-root.
+    "remoteUser": "rocket"
 }
