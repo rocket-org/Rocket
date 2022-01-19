@@ -1,6 +1,6 @@
 [package]
 name = "rocket_db_pools"
-version = "0.1.0-rc"
+version = "0.1.0-rc.2"
 authors = ["Sergio Benitez <sb@sergio.bz>", "Jeb Rosen <jeb@jebrosen.com>"]
 description = "Rocket async database pooling support"
 repository = "https://github.com/SergioBenitez/Rocket/contrib/db_pools"
@@ -36,7 +36,7 @@ default-features = false
 
 [dependencies.rocket_db_pools_codegen]
 path = "../codegen"
-version = "0.1.0-rc"
+version = "0.1.0-rc.2"
 
 [dependencies.deadpool]
 version = "0.8"
