@@ -23,7 +23,8 @@ RUN echo "Updating packages..." \
     && usermod -p $(echo "$RANDOM-x-$RANDOM-x-$RANDOM-x-$RANDOM-x-$RANDOM" | hexdump -e '"%02x"') rocket \
     && echo "" > /etc/motd \
     && echo "Installing required packages..." \
-    && apk add -U --no-cache bash gcc lldb musl-dev openssh-server openssh-keygen \
+    && apk add -U --no-cache bash cmake gcc lldb make musl-dev \
+            openssh-server openssh-keygen \
             openssl-dev perl pkgconf-dev python3 \
     && sed -i -e 's/^[#]Port .*$/Port 2222/' \
             -e 's/^[#]PermitRootLogin .*$/PermitRootLogin no/' \
