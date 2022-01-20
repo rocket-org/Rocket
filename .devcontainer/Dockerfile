@@ -24,7 +24,7 @@ RUN echo "Updating packages..." \
     && echo "" > /etc/motd \
     && echo "Installing required packages..." \
     && apk add -U --no-cache bash build-base cmake curl-dev lldb mariadb-dev \
-            musl-dev openssh-server openssh-keygen \
+            musl-dev ncurses openssh-server openssh-keygen \
             openssl-dev perl pkgconf-dev postgresql-dev python3 \
     && sed -i -e 's/^[#]Port .*$/Port 2222/' \
             -e 's/^[#]PermitRootLogin .*$/PermitRootLogin no/' \
