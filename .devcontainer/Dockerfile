@@ -26,6 +26,7 @@ RUN echo "Updating packages..." \
     && apk add -U --no-cache bash build-base cmake curl-dev lldb mariadb-dev \
             musl-dev ncurses openssh-server openssh-keygen \
             openssl-dev perl pkgconf-dev postgresql-dev python3 \
+            sqlite-dev \
     && sed -i -e 's/^[#]Port .*$/Port 2222/' \
             -e 's/^[#]PermitRootLogin .*$/PermitRootLogin no/' \
             -e 's/^[#]PasswordAuthentication .*$/PasswordAuthentication no/' \
