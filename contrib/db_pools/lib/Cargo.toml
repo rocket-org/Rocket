@@ -12,7 +12,9 @@ edition = "2018"
 [package.metadata]
 # minimum supported rust version 1.53.0 because of
 # error[E0391]: cycle detected when computing the supertraits of `database::Database`
-msrv = "1.53.0"
+# minimum supported rust version 1.54.0 because of
+# dependency sqlx depends uses `std::io::ErrorKind::OutOfMemory`
+msrv = "1.54.0"
 
 [package.metadata.docs.rs]
 all-features = true
@@ -39,25 +41,28 @@ path = "../codegen"
 version = "0.1.0-rc.2"
 
 [dependencies.deadpool]
-version = "0.8"
+# to update deadpool to 0.9 would require MSRV 1.54.0
+version = "0.9"
 default-features = false
 features = ["rt_tokio_1", "managed"]
 optional = true
 
 [dependencies.deadpool-postgres]
-version = "0.9"
+# to update to 0.10 would require MSRV 1.54.0
+version = "0.10"
 default-features = false
 features = ["rt_tokio_1"]
 optional = true
 
 [dependencies.deadpool-redis]
-version = "0.8.1"
+# to update to 0.10 would require MSRV 1.54.0
+version = "0.10"
 default-features = false
 features = ["rt_tokio_1"]
 optional = true
 
 [dependencies.mongodb]
-version = "1"
+version = "2.1"
 default-features = false
 features = ["tokio-runtime"]
 optional = true
