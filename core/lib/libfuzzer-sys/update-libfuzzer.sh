@@ -18,4 +18,3 @@ git clone -b "$1" --single-branch https://github.com/llvm/llvm-project.git "$tmp
 && mv "$project_dir/libfuzzer" "$project_dir/libfuzzer.$(date +%Y%m%d%H%M%S)" \
 && mv "$tmp_dir/compiler-rt/lib/fuzzer" "$project_dir/libfuzzer"
 [ -d "$tmp_dir" ] && rm -rf "$tmp_dir"
-

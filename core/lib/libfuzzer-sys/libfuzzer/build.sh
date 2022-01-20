@@ -8,4 +8,3 @@ wait
 rm -f libFuzzer.a
 ar ru libFuzzer.a Fuzzer*.o
 rm -f Fuzzer*.o
-
