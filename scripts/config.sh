@@ -35,6 +35,9 @@ function future_date() {
   fi
 }
 
+[ -n "$CARGO" ] || CARGO="cargo"
+[ -n "$RUSTC" ] || RUSTC="rustc"
+
 # Root of workspace-like directories.
 PROJECT_ROOT=$(relative "") || exit $?
 CORE_ROOT=$(relative "core") || exit $?
@@ -54,8 +57,9 @@ EXAMPLES_DIR=$(relative "examples") || exit $?
 DOC_DIR=$(relative "target/doc") || exit $?
 
 # Versioning information. These are changed as versions change.
-CARGO_VERSION="$(cargo --version)"
-RUSTC_VERSION="$(rustc --version)"
+CARGO_VERSION="$($CARGO --version)"
+RUSTC_VERSION="$($RUSTC --version)"
+RUST_NIGHTLY=$([ "X${RUSTC_VERSION%-nightly*}" != "X${RUSTC_VERSION}" ] && echo "nightly" || echo "")
 VERSION=$(git grep -h "^version" "${CORE_LIB_ROOT}" | head -n 1 | cut -d '"' -f2)
 MAJOR_VERSION=$(echo "${VERSION}" | cut -d'.' -f1-2)
 VIRTUAL_CODENAME="$(git branch --show-current)"

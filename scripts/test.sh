@@ -1,6 +1,15 @@
 #!/usr/bin/env bash
 set -e
 
+# set CARGO before sourcing config.sh
+CARGO="cargo"
+RUSTC="rustc"
+if [[ $1 == +* ]]; then
+  CARGO="$CARGO $1"
+  RUSTC="$RUSTC $1"
+  shift
+fi
+
 # Brings in _ROOT, _DIR, _DIRS globals.
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 source "${SCRIPT_DIR}/config.sh"
@@ -8,7 +17,6 @@ source "${SCRIPT_DIR}/config.sh"
 # Add Cargo to PATH.
 export PATH=${HOME}/.cargo/bin:${PATH}
 export CARGO_INCREMENTAL=0
-CARGO="cargo"
 
 # Checks that the versions for Cargo projects $@ all match
 function check_versions_match() {
@@ -123,13 +131,16 @@ function test_core() {
     uuid
   )
 
+  RUSTDOCFLAGS="$RUSTDOCFLAGS"
+  [ -n "$RUST_NIGHTLY" ] && RUSTDOCFLAGS="-Zunstable-options --no-run $RUSTDOCFLAGS"
+
   echo ":: Building and checking core [no features]..."
-  RUSTDOCFLAGS="-Zunstable-options --no-run" \
+  RUSTDOCFLAGS="$RUSTDOCFLAGS" \
     indir "${CORE_LIB_ROOT}" $CARGO test --no-default-features $@
 
   for feature in "${FEATURES[@]}"; do
     echo ":: Building and checking core [${feature}]..."
-    RUSTDOCFLAGS="-Zunstable-options --no-run" \
+    RUSTDOCFLAGS="$RUSTDOCFLAGS" \
       indir "${CORE_LIB_ROOT}" $CARGO test --no-default-features --features "${feature}" $@
   done
 }
@@ -163,11 +174,6 @@ function run_benchmarks() {
   indir "${BENCHMARKS_ROOT}" $CARGO update
   indir "${BENCHMARKS_ROOT}" $CARGO bench $@
 }
-
-if [[ $1 == +* ]]; then
-  CARGO="$CARGO $1"
-  shift
-fi
 
 # The kind of test we'll be running.
 TEST_KIND="default"
