@@ -23,9 +23,9 @@ RUN echo "Updating packages..." \
     && usermod -p $(echo "$RANDOM-x-$RANDOM-x-$RANDOM-x-$RANDOM-x-$RANDOM" | hexdump -e '"%02x"') "${USERNAME}" \
     && echo "" > /etc/motd \
     && echo "Installing required packages..." \
-    && apk add -U --no-cache bash cmake gcc lldb make musl-dev \
-            openssh-server openssh-keygen \
-            openssl-dev perl pkgconf-dev python3 \
+    && apk add -U --no-cache bash build-base cmake curl-dev lldb mariadb-dev \
+            musl-dev openssh-server openssh-keygen \
+            openssl-dev perl pkgconf-dev postgresql-dev python3 \
     && sed -i -e 's/^[#]Port .*$/Port 2222/' \
             -e 's/^[#]PermitRootLogin .*$/PermitRootLogin no/' \
             -e 's/^[#]PasswordAuthentication .*$/PasswordAuthentication no/' \
@@ -76,12 +76,15 @@ VOLUME /home/rocket/Rocket
 RUN echo "Installing tools with cargo..." \
     && source $HOME/.cargo/env \
     || exit 1 ; \
+    echo "Cargo config crt-static = false" \
+    && echo -e "\n[target.x86_64-unknown-linux-musl]\nrustflags = [\"-C\", \"target-feature=-crt-static\"]\n" >> $HOME/.cargo/config.toml \
+    || exit 1 ; \
     no_sccache_cleanup=0 ; \
     [ -d "$HOME/.cache/sccache" ] \
     && no_sccache_cleanup=1 ; \
     cargo +stable install sccache \
     && echo "Config sccache..." \
-    && echo -e "\n[build]\nrustc-wrapper = \"$HOME/.cargo/bin/sccache\"" >> $HOME/.cargo/config.toml \
+    && echo -e "\n[build]\nrustc-wrapper = \"$HOME/.cargo/bin/sccache\"\n" >> $HOME/.cargo/config.toml \
     && echo "Cargo installing..." \
     && cargo +stable install cargo-audit cargo-binutils cargo-cache cargo-crev cargo-duplicates \
             cargo-expand cargo-license cargo-msrv cargo-outdated cargo-trim cargo-update \
