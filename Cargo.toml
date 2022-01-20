@@ -10,3 +10,6 @@ members = [
   "contrib/dyn_templates/",
   "site/tests",
 ]
+
+[patch.crates-io]
+chrono = { git = "https://github.com/timvisee/chrono.git", rev = "5292db8" }
