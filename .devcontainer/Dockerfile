@@ -9,7 +9,7 @@ ARG USER_UID=10000
 ARG USER_GID=$USER_UID
 ARG INSTALL_ZSH="false"
 
-ARG ROCKET_MSRV="1.53.0"
+ARG ROCKET_MSRV="1.54.0"
 ARG ROCKET_REPO="https://github.com/rocket-org/Rocket.git"
 ARG ROCKET_VOLUME="/home/$USERNAME/Rocket"
 
