@@ -26,6 +26,7 @@
 //!
 //!      ```rust
 //!      # #[macro_use] extern crate rocket;
+//!      use std::collections::HashMap;
 //!      use rocket_dyn_templates::Template;
 //!
 //!      #[launch]
@@ -35,7 +36,7 @@
 //!
 //!      #[get("/")]
 //!      fn index() -> Template {
-//!          # let context = ();
+//!          let context: HashMap<&str, &str> = HashMap::new();
 //!          Template::render("template-name", &context)
 //!      }
 //!      ```
@@ -368,8 +369,7 @@ impl Template {
     ///     let client = Client::untracked(rocket).expect("valid rocket");
     ///
     ///     // Create a `context`. Here, just an empty `HashMap`.
-    ///     let mut context = HashMap::new();
-    ///     # context.insert("test", "test");
+    ///     let context: HashMap<&str, &str> = HashMap::new();
     ///     let template = Template::show(client.rocket(), "index", context);
     /// }
     /// ```
