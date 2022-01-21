@@ -42,14 +42,13 @@ uncased = "0.9"
 either = "1.6"
 pear = "0.2"
 pin-project-lite = "0.2"
-memchr = "2"
+memchr = "2.4"
 stable-pattern = "0.1"
 cookie = { version = "0.16", features = ["percent-encode", "secure"] }
 state = "0.5"
 
 [dependencies.x509-parser]
-# for 0.12 core/http/tls/mtls needs rework
-version = "0.9"
+version = "0.12"
 optional = true
 
 [dependencies.hyper]
