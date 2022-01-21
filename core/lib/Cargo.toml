@@ -35,17 +35,17 @@ uuid = ["uuid_", "rocket_http/uuid"]
 
 [dependencies]
 # Serialization dependencies.
-serde_json = { version = "1.0.26", optional = true }
-rmp-serde = { version = "0.15.0", optional = true }
+serde_json = { version = "1.0", optional = true }
+rmp-serde = { version = "1.0", optional = true }
 uuid_ = { package = "uuid", version = "0.8", optional = true, features = ["serde"] }
 
 # Non-optional, core dependencies from here on out.
-futures = { version = "0.3.0", default-features = false, features = ["std"] }
+futures = { version = "0.3", default-features = false, features = ["std"] }
 yansi = "0.5"
-log = { version = "0.4", features = ["std"] }
-num_cpus = "1.0"
+log = { version = "0.5", features = ["std"] }
+num_cpus = "1.13"
 time = { version = "0.3", features = ["macros", "parsing"] }
-memchr = "2" # TODO: Use pear instead.
+memchr = "2.4" # TODO: Use pear instead.
 binascii = "0.1"
 atty = "0.2"
 ref-cast = "1.0"
@@ -53,17 +53,17 @@ atomic = "0.5"
 parking_lot = "0.11"
 ubyte = {version = "0.10", features = ["serde"] }
 serde = { version = "1.0", features = ["derive"] }
-figment = { version = "0.10.6", features = ["toml", "env"] }
+figment = { version = "0.10", features = ["toml", "env"] }
 rand = "0.8"
-either = "1"
+either = "1.6"
 pin-project-lite = "0.2"
-indexmap = { version = "1.0", features = ["serde-1", "std"] }
-tempfile = "3"
-async-trait = "0.1.43"
-async-stream = "0.3.2"
-multer = { version = "2", features = ["tokio-io"] }
-tokio-stream = { version = "0.1.6", features = ["signal", "time"] }
-state = "0.5.1"
+indexmap = { version = "1.8", features = ["serde-1", "std"] }
+tempfile = "3.3"
+async-trait = "0.1"
+async-stream = "0.3"
+multer = { version = "2.0", features = ["tokio-io"] }
+tokio-stream = { version = "0.1", features = ["signal", "time"] }
+state = "0.5"
 
 [dependencies.rocket_codegen]
 version = "0.5.0-rc.2"
@@ -75,7 +75,7 @@ path = "../http"
 features = ["serde"]
 
 [dependencies.tokio]
-version = "1.6.1"
+version = "1.6"
 features = ["fs", "io-std", "io-util", "rt-multi-thread", "sync", "signal", "macros"]
 
 [dependencies.tokio-util]
@@ -88,8 +88,8 @@ version = "1.0"
 
 [build-dependencies]
 yansi = "0.5"
-version_check = "0.9.1"
+version_check = "0.9"
 
 [dev-dependencies]
 figment = { version = "0.10", features = ["test"] }
-pretty_assertions = "0.7"
+pretty_assertions = "1.0"
