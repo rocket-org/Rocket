@@ -28,26 +28,28 @@ uuid = ["uuid_"]
 
 [dependencies]
 smallvec = "1.0"
-percent-encoding = "2"
+percent-encoding = "2.1"
 http = "0.2"
 time = { version = "0.3", features = ["formatting", "macros"] }
-indexmap = { version = "1.5.2", features = ["std"] }
+indexmap = { version = "1.8", features = ["std"] }
+# TODO rustls 0.20 needs rework in http/src/tls/listener.rs
 rustls = { version = "0.19", optional = true }
-tokio-rustls = { version = "0.22.0", optional = true }
-tokio = { version = "1.6.1", features = ["net", "sync", "time"] }
+tokio-rustls = { version = "0.22", optional = true }
+tokio = { version = "1.6", features = ["net", "sync", "time"] }
 log = "0.4"
 ref-cast = "1.0"
-uncased = "0.9.6"
-either = "1"
-pear = "0.2.3"
+uncased = "0.9"
+either = "1.6"
+pear = "0.2"
 pin-project-lite = "0.2"
 memchr = "2"
 stable-pattern = "0.1"
-cookie = { version = "0.16.0", features = ["percent-encode", "secure"] }
-state = "0.5.1"
+cookie = { version = "0.16", features = ["percent-encode", "secure"] }
+state = "0.5"
 
 [dependencies.x509-parser]
-version = "0.9.2"
+# for 0.12 core/http/tls/mtls needs rework
+version = "0.9"
 optional = true
 
 [dependencies.hyper]
