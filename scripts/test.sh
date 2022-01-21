@@ -115,6 +115,9 @@ function test_contrib() {
     $CARGO test -p rocket_sync_db_pools --no-default-features --features $feature $@
   done
 
+  echo ":: Building and testing rocket_sync_db_pools_codegen_diesel_tests..."
+  $CARGO test -p rocket_sync_db_pools_codegen_diesel_tests $@
+
   for feature in "${DYN_TEMPLATES_FEATURES[@]}"; do
     echo ":: Building and testing dyn_templates [$feature]..."
     $CARGO test -p rocket_dyn_templates --no-default-features --features $feature $@
@@ -160,8 +163,50 @@ function test_examples() {
 }
 
 function test_default() {
+  FEATURES=(
+    tls
+    mtls
+    secrets
+    json
+    msgpack
+    uuid
+    private-cookies
+    serde
+    deadpool_postgres
+    deadpool_redis
+    sqlx_mysql
+    sqlx_postgres
+    sqlx_mssql
+    sqlx_macros
+    postgres_pool
+    memcache_pool
+    tera
+    handlebars
+  )
+  SQLITE_FEATURES=(
+    sqlx_sqlite
+    sqlite_pool
+  )
+  DIESEL_SQLITE_FEATURES=(
+    diesel_sqlite_pool
+    diesel_postgres_pool
+    diesel_mysql_pool
+  )
+
+  compatible_features=$(printf ",%s" "${FEATURES[@]}")
+  compatible_features=${compatible_features:1}
+  all_compatible_features="$compatible_features"
+  for feature in "${SQLITE_FEATURES[@]}"; do
+   all_compatible_features="$all_compatible_features,$feature"
+  done
   echo ":: Building and testing core libraries..."
-  indir "${PROJECT_ROOT}" $CARGO test --workspace --all-features $@
+  indir "${PROJECT_ROOT}" $CARGO test --workspace --features $all_compatible_features \
+      --exclude rocket_guide_tests --exclude rocket_sync_db_pools_codegen_diesel_tests $@
+
+  echo ":: Building and testing rocket_guide_tests (diesel-sqlite)..."
+  indir "${PROJECT_ROOT}" $CARGO test -p rocket_guide_tests --all-features $@
+  echo ":: Building and testing rocket_sync_db_pools_codegen_diesel_tests (diesel-sqlite)..."
+  indir "${PROJECT_ROOT}" $CARGO test -p rocket_sync_db_pools_codegen_diesel_tests --all-features $@
 
   echo ":: Checking benchmarks..."
   indir "${BENCHMARKS_ROOT}" $CARGO update
