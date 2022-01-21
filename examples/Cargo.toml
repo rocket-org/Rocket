@@ -17,6 +17,5 @@ members = [
   "tls",
 
   "pastebin",
-  "todo",
   "chat",
 ]

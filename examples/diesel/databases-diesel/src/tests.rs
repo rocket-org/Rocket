@@ -62,17 +62,17 @@ fn test(base: &str, stage: AdHoc) {
     assert_eq!(response.status(), Status::NotFound);
 }
 
-#[test]
-fn test_sqlx() {
-    test("/sqlx", crate::sqlx::stage())
-}
-
 // #[test]
-// fn test_diesel() {
-//     test("/diesel", crate::diesel_sqlite::stage())
+// fn test_sqlx() {
+//     test("/sqlx", crate::sqlx::stage())
 // }
 
 #[test]
-fn test_rusqlite() {
-    test("/rusqlite", crate::rusqlite::stage())
+fn test_diesel() {
+    test("/diesel", crate::diesel_sqlite::stage())
 }
+
+// #[test]
+// fn test_rusqlite() {
+//     test("/rusqlite", crate::rusqlite::stage())
+// }

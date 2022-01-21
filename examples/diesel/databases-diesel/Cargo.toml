@@ -1,0 +1,15 @@
+[package]
+name = "databases-diesel"
+version = "0.0.0"
+workspace = "../"
+edition = "2018"
+publish = false
+
+[dependencies]
+rocket = { path = "../../../core/lib", features = ["json"] }
+diesel = { version = "1.4", features = ["sqlite", "r2d2"] }
+diesel_migrations = { version = "1.4" }
+
+[dependencies.rocket_sync_db_pools]
+path = "../../../contrib/sync_db_pools/lib/"
+features = ["diesel_sqlite_pool"]

@@ -153,12 +153,15 @@ function test_examples() {
   echo ":: Building and testing examples..."
   indir "${EXAMPLES_DIR}" $CARGO update
   ROCKET_SECRET_KEY="itlYmFR2vYKrOmFhupMIn/hyB6lYCCTXz4yaQX89XVg=" \
-    indir "${EXAMPLES_DIR}" $CARGO test --all $@
-  }
+    indir "${EXAMPLES_DIR}" $CARGO test --workspace $@
+  indir "${EXAMPLES_DIR}/diesel" $CARGO update
+  ROCKET_SECRET_KEY="itlYmFR2vYKrOmFhupMIn/hyB6lYCCTXz4yaQX89XVg=" \
+    indir "${EXAMPLES_DIR}/diesel" $CARGO test --workspace $@
+}
 
 function test_default() {
   echo ":: Building and testing core libraries..."
-  indir "${PROJECT_ROOT}" $CARGO test --all --all-features $@
+  indir "${PROJECT_ROOT}" $CARGO test --workspace --all-features $@
 
   echo ":: Checking benchmarks..."
   indir "${BENCHMARKS_ROOT}" $CARGO update
@@ -166,7 +169,7 @@ function test_default() {
 
   echo ":: Checking fuzzers..."
   indir "${FUZZ_ROOT}" $CARGO update
-  indir "${FUZZ_ROOT}" $CARGO check --all --all-features $@
+  indir "${FUZZ_ROOT}" $CARGO check --workspace --all-features $@
 }
 
 function run_benchmarks() {
