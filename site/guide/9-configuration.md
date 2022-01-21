@@ -17,21 +17,22 @@ is configured with. This means that no matter which configuration provider
 Rocket is asked to use, it must be able to read the following configuration
 values:
 
-| key            | kind              | description                                     | debug/release default   |
-|----------------|-------------------|-------------------------------------------------|-------------------------|
-| `address`      | `IpAddr`          | IP address to serve on                          | `127.0.0.1`             |
-| `port`         | `u16`             | Port to serve on.                               | `8000`                  |
-| `workers`      | `usize`           | Number of threads to use for executing futures. | cpu core count          |
-| `ident`        | `string`, `false` | If and how to identify via the `Server` header. | `"Rocket"`              |
-| `keep_alive`   | `u32`             | Keep-alive timeout seconds; disabled when `0`.  | `5`                     |
-| `log_level`    | [`LogLevel`]      | Max level to log. (off/normal/debug/critical)   | `normal`/`critical`     |
-| `cli_colors`   | `bool`            | Whether to use colors and emoji when logging.   | `true`                  |
-| `secret_key`   | [`SecretKey`]     | Secret key for signing and encrypting values.   | `None`                  |
-| `tls`          | [`TlsConfig`]     | TLS configuration, if any.                      | `None`                  |
-| `limits`       | [`Limits`]        | Streaming read size limits.                     | [`Limits::default()`]   |
-| `limits.$name` | `&str`/`uint`     | Read limit for `$name`.                         | forms = "32KiB"         |
-| `ctrlc`        | `bool`            | Whether `ctrl-c` initiates a server shutdown.   | `true`                  |
-| `shutdown`     | [`Shutdown`]      | Graceful shutdown configuration.                | [`Shutdown::default()`] |
+| key                     | kind              | description                                              | debug/release default   |
+|-------------------------|-------------------|----------------------------------------------------------|-------------------------|
+| `address`               | `IpAddr`          | IP address to serve on                                   | `127.0.0.1`             |
+| `port`                  | `u16`             | Port to serve on.                                        | `8000`                  |
+| `workers`               | `usize`           | Number of threads to use for executing futures.          | cpu core count          |
+| `blocking_workers`      | `usize`           | Number of threads to use for executing blocking futures. | 512                     |
+| `ident`                 | `string`, `false` | If and how to identify via the `Server` header.          | `"Rocket"`              |
+| `keep_alive`            | `u32`             | Keep-alive timeout seconds; disabled when `0`.           | `5`                     |
+| `log_level`             | [`LogLevel`]      | Max level to log. (off/normal/debug/critical)            | `normal`/`critical`     |
+| `cli_colors`            | `bool`            | Whether to use colors and emoji when logging.            | `true`                  |
+| `secret_key`            | [`SecretKey`]     | Secret key for signing and encrypting values.            | `None`                  |
+| `tls`                   | [`TlsConfig`]     | TLS configuration, if any.                               | `None`                  |
+| `limits`                | [`Limits`]        | Streaming read size limits.                              | [`Limits::default()`]   |
+| `limits.$name`          | `&str`/`uint`     | Read limit for `$name`.                                  | forms = "32KiB"         |
+| `ctrlc`                 | `bool`            | Whether `ctrl-c` initiates a server shutdown.            | `true`                  |
+| `shutdown`              | [`Shutdown`]      | Graceful shutdown configuration.                         | [`Shutdown::default()`] |
 
 ### Profiles
 
@@ -135,6 +136,7 @@ sensible.
 address = "127.0.0.1"
 port = 8000
 workers = 16
+blocking_workers = 512
 keep_alive = 5
 ident = "Rocket"
 log_level = "normal"
@@ -337,6 +339,15 @@ configuration value cannot be reconfigured or be configured from sources other
 than those provided by [`Config::figment()`]. In other words, only the values
 set by the `ROCKET_WORKERS` environment variable or in the `workers` property of
 `Rocket.toml` will be considered - all other `workers` values are ignored.
+
+The `blocking_workers` parameter sets the maximum number of threads tokio will
+spawn to execute futures spawned with `spawn_blocking`. Similar to the `workers`
+parameter, this cannot be reconfigured. The runtime will only spawn these threads
+if there are futures to execute on them, and leaving this at it's default value
+is generally prefered. Rocket rarely spawns any of these, so running into the limit
+is unlikely, although in some situations the OS will limit the number of threads
+Rocket can spawn. In these situations, either the OS limit needs to be raised or
+the Rocket limit needs to be lowered.
 
 ## Extracting Values
 
