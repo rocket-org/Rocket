@@ -713,10 +713,11 @@ impl<'r> Request<'r> {
     /// # let request = c.get("/");
     /// // The first store into local cache for a given type wins.
     /// let value = request.local_cache(|| "hello");
-    /// assert_eq!(request.local_cache(|| "hello"), "hello");
+    /// assert_eq!(value, &"hello");
+    /// assert_eq!(request.local_cache(|| "hello"), &"hello");
     ///
     /// // The following return the cached, previously stored value for the type.
-    /// assert_eq!(request.local_cache(|| "goodbye"), "hello");
+    /// assert_eq!(request.local_cache(|| "goodbye"), &"hello");
     /// ```
     #[inline]
     pub fn local_cache<T, F>(&self, f: F) -> &T
