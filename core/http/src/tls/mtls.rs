@@ -201,6 +201,8 @@ impl<'a> Certificate<'a> {
             return Err(Error::Trailing(left.len()));
         }
 
+        // TODO: update to x509-parser 0.12
+
         if x509.subject().as_raw().is_empty() {
             if let Some(ext) = x509.extensions().get(&SUBJECT_ALT_NAME) {
                 if !matches!(ext.parsed_extension(), ParsedExtension::SubjectAlternativeName(..)) {
