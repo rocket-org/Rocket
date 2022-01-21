@@ -769,10 +769,10 @@ impl<'r> Request<'r> {
     /// Retrieves the cached value for type `T` from the request-local cached
     /// state of `self`. If no such value has previously been cached for this
     /// request, `None` is returned.
-    /// 
+    ///
     /// Different values of the same type _cannot_ be cached without using a
     /// proxy, wrapper type.
-    /// 
+    ///
     /// # Example
     ///
     /// ```rust
