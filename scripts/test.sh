@@ -183,20 +183,20 @@ function test_default() {
     tera
     handlebars
   )
-  SQLITE_FEATURES=(
+  COMPATIBLE_FEATURES=(
     sqlx_sqlite
     sqlite_pool
+    diesel_postgres_pool
+    diesel_mysql_pool
   )
   DIESEL_SQLITE_FEATURES=(
     diesel_sqlite_pool
-    diesel_postgres_pool
-    diesel_mysql_pool
   )
 
   compatible_features=$(printf ",%s" "${FEATURES[@]}")
   compatible_features=${compatible_features:1}
   all_compatible_features="$compatible_features"
-  for feature in "${SQLITE_FEATURES[@]}"; do
+  for feature in "${COMPATIBLE_FEATURES[@]}"; do
    all_compatible_features="$all_compatible_features,$feature"
   done
   echo ":: Building and testing core libraries..."
