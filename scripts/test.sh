@@ -131,6 +131,7 @@ function test_core() {
     mtls
     json
     msgpack
+    msgpack-compact
     uuid
   )
 

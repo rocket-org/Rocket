@@ -31,6 +31,7 @@ mtls = ["rocket_http/mtls", "tls"]
 secrets = ["rocket_http/private-cookies"]
 json = ["serde_json", "tokio/io-util"]
 msgpack = ["rmp-serde", "tokio/io-util"]
+msgpack-compact = ["msgpack"]
 uuid = ["uuid_", "rocket_http/uuid"]
 
 [dependencies]
