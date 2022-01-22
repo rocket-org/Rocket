@@ -12,12 +12,12 @@
 //! version = "0.5.0-rc.2"
 //! features = ["msgpack"]
 //! ```
-//! 
+//!
 //! If you prefer a compact format of `MsgPack` in your `Response`,
 //! this won't have any field description and your client needs to know
 //! before about the data structure,
 //! use feature `msgpack-compact`:
-//! 
+//!
 //! ```toml
 //! [dependencies.rocket]
 //! version = "0.5.0-rc.2"
