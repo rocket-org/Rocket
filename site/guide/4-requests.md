@@ -1716,7 +1716,7 @@ form field.
 
 ### Static Parameters
 
-A request matches a route [_iff_](https://en.wikipedia.org/wiki/If_and_only_if) 
+A request matches a route [_iff_](https://en.wikipedia.org/wiki/If_and_only_if)
 its query string contains all of the static
 parameters in the route's query string. A route with a static parameter `param`
 (any UTF-8 text string) in a query will only match requests with that exact path
