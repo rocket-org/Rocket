@@ -39,7 +39,7 @@ pub struct RawCertificate(pub Vec<u8>);
 // NOTE: `rustls::Certificate` is exactly isomorphic to `RawCertificate`.
 #[doc(inline)]
 #[cfg(feature = "tls")]
-pub use rustls::Certificate as RawCertificate;
+pub use tokio_rustls::rustls::Certificate as RawCertificate;
 
 /// A 'Connection' represents an open connection to a client
 pub trait Connection: AsyncRead + AsyncWrite {

@@ -20,7 +20,7 @@ msrv = "1.51.0"
 
 [features]
 default = []
-tls = ["rustls", "tokio-rustls"]
+tls = ["rustls-pemfile", "tokio-rustls"]
 mtls = ["tls", "x509-parser"]
 private-cookies = ["cookie/private", "cookie/key-expansion"]
 serde = ["uncased/with-serde-alloc", "serde_"]
@@ -32,9 +32,8 @@ percent-encoding = "2.1"
 http = "0.2"
 time = { version = "0.3", features = ["formatting", "macros"] }
 indexmap = { version = "1.8", features = ["std"] }
-# TODO rustls 0.20 needs rework in http/src/tls/listener.rs
-rustls = { version = "0.19", optional = true }
-tokio-rustls = { version = "0.22", optional = true }
+rustls-pemfile = { version = "0.2", optional = true }
+tokio-rustls = { version = "0.23", optional = true }
 tokio = { version = "1.6", features = ["net", "sync", "time"] }
 log = "0.4"
 ref-cast = "1.0"
