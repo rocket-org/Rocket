@@ -528,7 +528,7 @@ macro_rules! context {
 
         #[allow(non_camel_case_types)]
         impl<$($key: Serialize),*> Serialize for ContextMacroCtxObject<$($key),*> {
-            fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+            fn serialize<S>(&self, serializer: S) -> ::std::result::Result<S::Ok, S::Error>
                 where S: Serializer,
             {
                 let mut map = serializer.serialize_map(None)?;
