@@ -59,14 +59,15 @@
 //! To avoid compiling unused dependencies, Rocket gates certain features, all
 //! of which are disabled by default:
 //!
-//! | Feature   | Description                                             |
-//! |-----------|---------------------------------------------------------|
-//! | `secrets` | Support for authenticated, encrypted [private cookies]. |
-//! | `tls`     | Support for [TLS] encrypted connections.                |
-//! | `mtls`    | Support for verified clients via [mutual TLS].          |
-//! | `json`    | Support for [JSON (de)serialization].                   |
-//! | `msgpack` | Support for [MessagePack (de)serialization].            |
-//! | `uuid`    | Support for [UUID value parsing and (de)serialization]. |
+//! | Feature           | Description                                             |
+//! |-------------------|---------------------------------------------------------|
+//! | `secrets`         | Support for authenticated, encrypted [private cookies]. |
+//! | `tls`             | Support for [TLS] encrypted connections.                |
+//! | `mtls`            | Support for verified clients via [mutual TLS].          |
+//! | `json`            | Support for [JSON (de)serialization].                   |
+//! | `msgpack`         | Support for [MessagePack (de)serialization].            |
+//! | `msgpack-compact` | Support for compact [MessagePack (de)serialization].    |
+//! | `uuid`            | Support for [UUID value parsing and (de)serialization]. |
 //!
 //! Features can be selectively enabled in `Cargo.toml`:
 //!
