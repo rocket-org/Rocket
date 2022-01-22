@@ -34,7 +34,7 @@ time = { version = "0.3", features = ["formatting", "macros"] }
 indexmap = { version = "1.8", features = ["std"] }
 rustls-pemfile = { version = "0.2", optional = true }
 tokio-rustls = { version = "0.23", optional = true }
-tokio = { version = "1.6", features = ["net", "sync", "time"] }
+tokio = { version = "1.15", features = ["net", "sync", "time"] }
 log = "0.4"
 ref-cast = "1.0"
 uncased = "0.9"
