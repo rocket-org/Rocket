@@ -2,7 +2,13 @@
 fn ui() {
     let path = match version_check::is_feature_flaggable() {
         Some(true) => "ui-fail-nightly",
-        _ => "ui-fail-stable"
+        _ => {
+            if version_check::is_min_version("1.55.0") {
+                "ui-fail-stable"
+            } else {
+                "ui-fail-msrv"
+            }
+        }
     };
 
     let t = trybuild::TestCases::new();
