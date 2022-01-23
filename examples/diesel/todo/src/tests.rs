@@ -3,7 +3,7 @@ use super::task::Task;
 use rand::{Rng, thread_rng, distributions::Alphanumeric};
 
 use rocket::local::asynchronous::Client;
-use rocket::http::{Status, ContentType};
+use rocket::http::{Status, ContentType, Cookie};
 
 // We use a lock to synchronize between tests so DB operations don't collide.
 // For now. In the future, we'll have a nice way to run each test in a DB
@@ -151,7 +151,33 @@ fn test_bad_form_submissions() {
             .await;
 
         let mut cookies = res.headers().get("Set-Cookie");
-        assert!(cookies.any(|value| value.contains("error")));
+        let cookie = cookies
+            .find(|value| value.contains("error"))
+            .map(|value| Cookie::parse_encoded(value).expect("cookie"))
+            .expect("cookie");
+        assert_eq!(cookie.name(), "_flash"); // private const
+
+        // Check that the index page now contains the flash message that we were expecting.
+        // A client supporting cookies will set the cookie by the receiving _Set-Cookie_ header.
+        let body = client
+            .get("/")
+            .cookie(cookie) // set cookie
+            .dispatch()
+            .await
+            .into_string()
+            .await
+            .expect("body");
+        assert!(body.contains("Description cannot be empty."));
+
+        // Check that the flash message was cleared upon another visit to the index page.
+        let body = client
+            .get("/")
+            .dispatch()
+            .await
+            .into_string()
+            .await
+            .expect("body");
+        assert!(!body.contains("Description cannot be empty."));
 
         // Submit a form without a description. Expect a 422 but no flash error.
         let res = client.post("/todo")
