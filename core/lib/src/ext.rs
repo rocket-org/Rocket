@@ -10,6 +10,10 @@ use tokio::time::{sleep, Sleep};
 use futures::stream::Stream;
 use futures::future::{self, Future, FutureExt};
 
+use crate::http::private::{Listener, Connection};
+#[cfg(feature = "tls")]
+use crate::http::private::RawCertificate;
+
 pin_project! {
     pub struct ReaderStream<R> {
         #[pin]
@@ -290,8 +294,6 @@ impl<F: Future, I: AsyncWrite> AsyncWrite for CancellableIo<F, I> {
         self.io.is_write_vectored()
     }
 }
-
-use crate::http::private::{Listener, Connection, RawCertificate};
 
 impl<F: Future, C: Connection> Connection for CancellableIo<F, C> {
     fn peer_address(&self) -> Option<std::net::SocketAddr> {

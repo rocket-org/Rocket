@@ -16,6 +16,7 @@ use crate::data::Limits;
 use crate::http::{hyper, Method, Header, HeaderMap};
 use crate::http::{ContentType, Accept, MediaType, CookieJar, Cookie};
 use crate::http::uncased::UncasedStr;
+#[cfg(feature = "tls")]
 use crate::http::private::RawCertificate;
 use crate::http::uri::{fmt::Path, Origin, Segments, Host, Authority};
 
