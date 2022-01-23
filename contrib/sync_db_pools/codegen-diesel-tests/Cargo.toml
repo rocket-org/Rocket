@@ -7,6 +7,7 @@ readme = "../../README.md"
 keywords = ["rocket", "framework", "database", "pools"]
 license = "MIT OR Apache-2.0"
 edition = "2018"
+publish = false
 
 [dev-dependencies]
 version_check = "0.9"
