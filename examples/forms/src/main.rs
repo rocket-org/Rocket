@@ -32,6 +32,7 @@ enum Category {
     ComputerScience,
 }
 
+#[allow(dead_code)] // reason = "fields are used in tera templates"
 #[derive(Debug, FromForm)]
 struct Submission<'v> {
     #[field(validate = len(1..))]
@@ -47,6 +48,7 @@ struct Submission<'v> {
     ready: bool,
 }
 
+#[allow(dead_code)] // reason = "fields are used in tera templates"
 #[derive(Debug, FromForm)]
 struct Account<'v> {
     #[field(validate = len(1..))]
@@ -56,6 +58,7 @@ struct Account<'v> {
     email: &'v str,
 }
 
+#[allow(dead_code)] // reason = "fields are used in tera templates"
 #[derive(Debug, FromForm)]
 struct Submit<'v> {
     account: Account<'v>,
