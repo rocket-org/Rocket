@@ -54,6 +54,9 @@ pub trait Connection: AsyncRead + AsyncWrite {
     ///
     /// Defaults to an empty vector to indicate that no certificates were
     /// presented.
+    /// 
+    /// Supported only with feature `tls`.
+    #[cfg(feature = "tls")]
     fn peer_certificates(&self) -> Option<Vec<RawCertificate>> { None }
 }
 

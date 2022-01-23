@@ -37,6 +37,7 @@ pub struct Request<'r> {
 #[derive(Clone)]
 pub(crate) struct ConnectionMeta {
     pub remote: Option<SocketAddr>,
+    #[cfg(feature = "tls")]
     pub client_certificates: Option<Arc<Vec<RawCertificate>>>,
 }
 
@@ -91,6 +92,7 @@ impl<'r> Request<'r> {
             headers: HeaderMap::new(),
             connection: ConnectionMeta {
                 remote: None,
+                #[cfg(feature = "tls")]
                 client_certificates: None,
             },
             state: RequestState {
