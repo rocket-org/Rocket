@@ -298,6 +298,7 @@ impl<F: Future, C: Connection> Connection for CancellableIo<F, C> {
         self.io.peer_address()
     }
 
+    #[cfg(feature = "tls")]
     fn peer_certificates(&self) -> Option<Vec<RawCertificate>> {
         self.io.peer_certificates()
     }
