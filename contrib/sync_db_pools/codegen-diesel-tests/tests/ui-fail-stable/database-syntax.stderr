@@ -31,7 +31,7 @@ error: `database` attribute can only be used on structs
    | ^^^^
 
 error: `database` attribute can only be applied to structs with exactly one unnamed field
-  --- help: example: `struct MyDatabase(diesel::SqliteConnection);`
+         --- help: example: `struct MyDatabase(diesel::SqliteConnection);`
   --> tests/ui-fail-stable/database-syntax.rs:22:11
    |
 22 | struct Bar(diesel::SqliteConnection, diesel::SqliteConnection);
