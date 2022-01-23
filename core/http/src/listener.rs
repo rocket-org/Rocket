@@ -167,12 +167,9 @@ impl<L: Listener> Accept for Incoming<L> {
 /// The delay is useful to handle resource exhaustion errors like ENFILE
 /// and EMFILE. Otherwise, could enter into tight loop.
 fn is_connection_error(e: &io::Error) -> bool {
-    match e.kind() {
-        io::ErrorKind::ConnectionRefused |
+    matches!(e.kind(), io::ErrorKind::ConnectionRefused |
         io::ErrorKind::ConnectionAborted |
-        io::ErrorKind::ConnectionReset => true,
-        _ => false,
-    }
+        io::ErrorKind::ConnectionReset)
 }
 
 impl<L: fmt::Debug> fmt::Debug for Incoming<L> {

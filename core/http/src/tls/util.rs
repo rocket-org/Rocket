@@ -9,7 +9,7 @@ fn err(message: impl Into<std::borrow::Cow<'static, str>>) -> io::Error {
 /// Loads certificates from `reader`.
 pub fn load_certs(reader: &mut dyn io::BufRead) -> io::Result<Vec<Certificate>> {
     let der_cert_data = rustls_pemfile::certs(reader).map_err(|_| err("invalid certificate"))?;
-    Ok(der_cert_data.into_iter().map(|c| Certificate(c)).collect())
+    Ok(der_cert_data.into_iter().map(Certificate).collect())
 }
 
 /// Load and decode the private key from `reader`.
