@@ -64,6 +64,7 @@ pub fn database_attr(attr: TokenStream, input: TokenStream) -> Result<TokenStrea
     let name = &invocation.db_name;
     let guard_type = &invocation.type_name;
     let vis = &invocation.visibility;
+    let _ = &invocation.structure; // TODO: what is purpose of structure field?
     let fairing_name = format!("'{}' Database Pool", name);
     let span = conn_type.span();
 
