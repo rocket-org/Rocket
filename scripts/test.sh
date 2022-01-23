@@ -110,10 +110,16 @@ function test_contrib() {
     $CARGO test -p rocket_db_pools --no-default-features --features $feature $@
   done
 
+  echo ":: Building and testing rocket_db_pools_codegen..."
+  $CARGO test -p rocket_db_pools_codegen $@
+
   for feature in "${SYNC_DB_POOLS_FEATURES[@]}"; do
     echo ":: Building and testing sync_db_pools [$feature]..."
     $CARGO test -p rocket_sync_db_pools --no-default-features --features $feature $@
   done
+
+  echo ":: Building and testing rocket_sync_db_pools_codegen..."
+  $CARGO test -p rocket_sync_db_pools_codegen $@
 
   echo ":: Building and testing rocket_sync_db_pools_codegen_diesel_tests..."
   $CARGO test -p rocket_sync_db_pools_codegen_diesel_tests $@
