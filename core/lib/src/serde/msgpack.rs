@@ -318,7 +318,7 @@ where
 /// ```
 /// use rocket::serde::{msgpack, Deserialize, Serialize};
 ///
-/// #[derive(Deserialize, PartialEq, Serialize)]
+/// #[derive(Debug, Deserialize, PartialEq, Serialize)]
 /// #[serde(crate = "rocket::serde")]
 /// struct Data<'r> {
 ///     framework: &'r str,
@@ -355,7 +355,7 @@ where
 /// ```
 /// use rocket::serde::{msgpack, Deserialize, Serialize};
 ///
-/// #[derive(Deserialize, PartialEq, Serialize)]
+/// #[derive(Debug, Deserialize, PartialEq, Serialize)]
 /// #[serde(crate = "rocket::serde")]
 /// struct Data<'r> {
 ///     framework: &'r str,
@@ -397,7 +397,7 @@ where
 /// ```
 /// use rocket::serde::{msgpack, Deserialize, Serialize};
 ///
-/// #[derive(Deserialize, PartialEq, Serialize)]
+/// #[derive(Debug, Deserialize, PartialEq, Serialize)]
 /// #[serde(crate = "rocket::serde")]
 /// struct Data<'r> {
 ///     framework: &'r str,
@@ -438,7 +438,7 @@ where
 /// ```
 /// use rocket::serde::{msgpack, Deserialize, Serialize};
 ///
-/// #[derive(Deserialize, PartialEq, Serialize)]
+/// #[derive(Debug, Deserialize, PartialEq, Serialize)]
 /// #[serde(crate = "rocket::serde")]
 /// struct Data<'r> {
 ///     framework: &'r str,
