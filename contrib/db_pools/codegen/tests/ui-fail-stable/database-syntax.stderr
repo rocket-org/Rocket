@@ -1,3 +1,11 @@
+warning: field is never read: `query_segs`
+  --> $WORKSPACE/core/lib/src/route/uri.rs
+   |
+   |     pub query_segs: Vec<Segment>,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = note: `#[warn(dead_code)]` on by default
+
 error: invalid value: expected string literal
  --> tests/ui-fail-stable/database-syntax.rs:4:12
   |

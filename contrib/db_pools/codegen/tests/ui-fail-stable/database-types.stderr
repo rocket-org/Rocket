@@ -1,3 +1,11 @@
+warning: field is never read: `query_segs`
+  --> $WORKSPACE/core/lib/src/route/uri.rs
+   |
+   |     pub query_segs: Vec<Segment>,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = note: `#[warn(dead_code)]` on by default
+
 error[E0277]: the trait bound `Unknown: Pool` is not satisfied
   --> tests/ui-fail-stable/database-types.rs:7:10
    |

@@ -1,3 +1,11 @@
+warning: field is never read: `query_segs`
+  --> $WORKSPACE/core/lib/src/route/uri.rs
+   |
+   |     pub query_segs: Vec<Segment>,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = note: `#[warn(dead_code)]` on by default
+
 error: unexpected end of input, expected string literal
  --> tests/ui-fail-stable/database-syntax.rs:6:1
   |
@@ -31,7 +39,7 @@ error: `database` attribute can only be used on structs
    | ^^^^
 
 error: `database` attribute can only be applied to structs with exactly one unnamed field
-  --- help: example: `struct MyDatabase(diesel::SqliteConnection);`
+         --- help: example: `struct MyDatabase(diesel::SqliteConnection);`
   --> tests/ui-fail-stable/database-syntax.rs:22:11
    |
 22 | struct Bar(diesel::SqliteConnection, diesel::SqliteConnection);

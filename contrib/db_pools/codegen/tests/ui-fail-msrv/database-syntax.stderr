@@ -1,11 +1,11 @@
 error: invalid value: expected string literal
- --> tests/ui-fail-stable/database-syntax.rs:4:12
+ --> tests/ui-fail-msrv/database-syntax.rs:4:12
   |
 4 | #[database(123)]
   |            ^^^
 
 error: [note] error occurred while deriving `Database`
- --> tests/ui-fail-stable/database-syntax.rs:3:10
+ --> tests/ui-fail-msrv/database-syntax.rs:3:10
   |
 3 | #[derive(Database)]
   |          ^^^^^^^^
@@ -13,13 +13,13 @@ error: [note] error occurred while deriving `Database`
   = note: this error originates in the derive macro `Database` (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error: expected key/value `key = value`
- --> tests/ui-fail-stable/database-syntax.rs:8:25
+ --> tests/ui-fail-msrv/database-syntax.rs:8:25
   |
 8 | #[database("some-name", "another")]
   |                         ^^^^^^^^^
 
 error: [note] error occurred while deriving `Database`
- --> tests/ui-fail-stable/database-syntax.rs:7:10
+ --> tests/ui-fail-msrv/database-syntax.rs:7:10
   |
 7 | #[derive(Database)]
   |          ^^^^^^^^
@@ -27,13 +27,13 @@ error: [note] error occurred while deriving `Database`
   = note: this error originates in the derive macro `Database` (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error: unexpected attribute parameter: `name`
-  --> tests/ui-fail-stable/database-syntax.rs:12:25
+  --> tests/ui-fail-msrv/database-syntax.rs:12:25
    |
 12 | #[database("some-name", name = "another")]
    |                         ^^^^
 
 error: [note] error occurred while deriving `Database`
-  --> tests/ui-fail-stable/database-syntax.rs:11:10
+  --> tests/ui-fail-msrv/database-syntax.rs:11:10
    |
 11 | #[derive(Database)]
    |          ^^^^^^^^
@@ -41,13 +41,13 @@ error: [note] error occurred while deriving `Database`
    = note: this error originates in the derive macro `Database` (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error: enums are not supported
-  --> tests/ui-fail-stable/database-syntax.rs:16:1
+  --> tests/ui-fail-msrv/database-syntax.rs:16:1
    |
 16 | #[database("foo")]
    | ^
 
 error: [note] error occurred while deriving `Database`
-  --> tests/ui-fail-stable/database-syntax.rs:15:10
+  --> tests/ui-fail-msrv/database-syntax.rs:15:10
    |
 15 | #[derive(Database)]
    |          ^^^^^^^^
@@ -55,13 +55,13 @@ error: [note] error occurred while deriving `Database`
    = note: this error originates in the derive macro `Database` (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error: missing `#[database("name")]` attribute
-  --> tests/ui-fail-stable/database-syntax.rs:20:1
+  --> tests/ui-fail-msrv/database-syntax.rs:20:1
    |
 20 | struct E(deadpool_postgres::Pool);
    | ^^^^^^
 
 error: [note] error occurred while deriving `Database`
-  --> tests/ui-fail-stable/database-syntax.rs:19:10
+  --> tests/ui-fail-msrv/database-syntax.rs:19:10
    |
 19 | #[derive(Database)]
    |          ^^^^^^^^
@@ -69,13 +69,13 @@ error: [note] error occurred while deriving `Database`
    = note: this error originates in the derive macro `Database` (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error: struct must have exactly one unnamed field
-  --> tests/ui-fail-stable/database-syntax.rs:23:1
+  --> tests/ui-fail-msrv/database-syntax.rs:23:1
    |
 23 | #[database("foo")]
    | ^
 
 error: [note] error occurred while deriving `Database`
-  --> tests/ui-fail-stable/database-syntax.rs:22:10
+  --> tests/ui-fail-msrv/database-syntax.rs:22:10
    |
 22 | #[derive(Database)]
    |          ^^^^^^^^
@@ -83,13 +83,13 @@ error: [note] error occurred while deriving `Database`
    = note: this error originates in the derive macro `Database` (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error: struct must have exactly one unnamed field
-  --> tests/ui-fail-stable/database-syntax.rs:27:1
+  --> tests/ui-fail-msrv/database-syntax.rs:27:1
    |
 27 | #[database("foo")]
    | ^
 
 error: [note] error occurred while deriving `Database`
-  --> tests/ui-fail-stable/database-syntax.rs:26:10
+  --> tests/ui-fail-msrv/database-syntax.rs:26:10
    |
 26 | #[derive(Database)]
    |          ^^^^^^^^
@@ -97,13 +97,13 @@ error: [note] error occurred while deriving `Database`
    = note: this error originates in the derive macro `Database` (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error: named structs are not supported
-  --> tests/ui-fail-stable/database-syntax.rs:31:1
+  --> tests/ui-fail-msrv/database-syntax.rs:31:1
    |
 31 | #[database("foo")]
    | ^
 
 error: [note] error occurred while deriving `Database`
-  --> tests/ui-fail-stable/database-syntax.rs:30:10
+  --> tests/ui-fail-msrv/database-syntax.rs:30:10
    |
 30 | #[derive(Database)]
    |          ^^^^^^^^
