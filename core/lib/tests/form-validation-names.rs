@@ -66,8 +66,9 @@ fn test_form_validation_context() {
     }
 
     // check if parse works and get rid of unused warnings
-    let ok_str = "cats[0].name=BobDerStreuner&cats[0].nick=kitty&kitty.name=HiKitty&kitty.nick=kitty&dog.name=Bulldog";
-    let person = Form::<Person>::parse(ok_str).expect("parse");
+    let mut ok_str = String::from("cats[0].name=BobDerStreuner&cats[0].nick=kitty");
+    ok_str += "&kitty.name=HiKitty&kitty.nick=kitty&dog.name=Bulldog";
+    let person = Form::<Person>::parse(&ok_str).expect("parse");
     let _ = person.cats;
     let _ = person.dog.name;
     let _ = person.kitty.name;
