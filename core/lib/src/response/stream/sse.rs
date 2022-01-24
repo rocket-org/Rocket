@@ -789,17 +789,23 @@ mod sse_tests {
         assert!(string.contains("data:foo\n\n"));
         assert!(string.contains("data:bar\n\n"));
 
+        // The heartbeat comment races with the data in the events on the tests below.
+        // So testing for part of event because there could be a heartbeat comment
+        // before or after the data.
+
         // We shouldn't send a heartbeat if a message is immediately available.
         let stream = EventStream::from(once(ready(Event::data("hello"))));
         let string = stream.heartbeat(Duration::from_secs(1)).into_string();
-        assert_eq!(string, "data:hello\n\n");
+        let heartbeats = string.matches(HEARTBEAT).count();
+        assert!(heartbeats <= 1);
+        assert!(string.contains("data:hello\n"), "string: {}", string.as_str());
 
         // It's okay if we do it with two, though.
         let stream = EventStream::from(iter(vec![Event::data("a"), Event::data("b")]));
         let string = stream.heartbeat(Duration::from_secs(1)).into_string();
         let heartbeats = string.matches(HEARTBEAT).count();
         assert!(heartbeats <= 1);
-        assert!(string.contains("data:a\n\n"));
-        assert!(string.contains("data:b\n\n"));
+        assert!(string.contains("data:a\n"), "string: {}", string.as_str());
+        assert!(string.contains("data:b\n"), "string: {}", string.as_str());
     }
 }
