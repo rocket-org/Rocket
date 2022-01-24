@@ -12,7 +12,7 @@
 //!
 //!      ```toml
 //!      [dependencies.rocket_dyn_templates]
-//!      version = "0.1.0-rc.1"
+//!      version = "0.1.0-rc.2"
 //!      features = ["handlebars", "tera"]
 //!      ```
 //!
@@ -77,11 +77,11 @@
 //!
 //! | Engine       | Version | Extension |
 //! |--------------|---------|-----------|
-//! | [Tera]       | 1       | `.tera`   |
-//! | [Handlebars] | 4       | `.hbs`    |
+//! | [Tera]       | 1.15    | `.tera`   |
+//! | [Handlebars] | 4.2     | `.hbs`    |
 //!
-//! [Tera]: https://docs.rs/crate/tera/1
-//! [Handlebars]: https://docs.rs/crate/handlebars/4
+//! [Tera]: https://docs.rs/crate/tera/1.15
+//! [Handlebars]: https://docs.rs/crate/handlebars/4.2
 //!
 //! Any file that ends with one of these extension will be discovered and
 //! rendered with the corresponding templating engine. The _name_ of the

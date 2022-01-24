@@ -327,7 +327,7 @@
 //! | Memcache | [`memcache`]          | `0.15`    | [`memcache::Client`]           | `memcache_pool`        |
 //!
 //! [Diesel]: https://diesel.rs
-//! [`rusqlite::Connection`]: https://docs.rs/rusqlite/0.23.0/rusqlite/struct.Connection.html
+//! [`rusqlite::Connection`]: https://docs.rs/rusqlite/0.26/rusqlite/struct.Connection.html
 //! [`diesel::SqliteConnection`]: http://docs.diesel.rs/diesel/prelude/struct.SqliteConnection.html
 //! [`postgres::Client`]: https://docs.rs/postgres/0.19/postgres/struct.Client.html
 //! [`diesel::PgConnection`]: http://docs.diesel.rs/diesel/pg/struct.PgConnection.html

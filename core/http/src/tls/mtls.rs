@@ -1,7 +1,7 @@
 pub mod oid {
     //! Lower-level OID types re-exported from
-    //! [`oid_registry`](https://docs.rs/oid-registry/0.1) and
-    //! [`der-parser`](https://docs.rs/der-parser/5).
+    //! [`oid_registry`](https://docs.rs/oid-registry/0.2) and
+    //! [`der-parser`](https://docs.rs/der-parser/6.0).
 
     pub use x509_parser::der_parser::oid::*;
     pub use x509_parser::objects::*;
@@ -16,7 +16,7 @@ pub mod bigint {
 
 pub mod x509 {
     //! Lower-level X.509 types re-exported from
-    //! [`x509_parser`](https://docs.rs/x509-parser/0.9).
+    //! [`x509_parser`](https://docs.rs/x509-parser/0.12).
     //!
     //! Lack of documentation is directly inherited from the source crate.
     //! Prefer to use Rocket's wrappers when possible.
