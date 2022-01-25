@@ -77,6 +77,7 @@ pub(crate) enum Color {
     Wild = 1,
 }
 
+#[allow(dead_code)] // reason = TODO: maybe there will come some usage
 #[derive(Debug, Clone)]
 pub(crate) struct Metadata {
     /// Segments in the base.
