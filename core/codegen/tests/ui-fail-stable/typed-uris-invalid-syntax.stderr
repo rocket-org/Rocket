@@ -86,7 +86,7 @@ error: expected at least 1 argument, found none
   --> tests/ui-fail-stable/typed-uris-invalid-syntax.rs:26:5
    |
 26 |     uri!();
-   |     ^^^^^^^
+   |     ^^^^^^
    |
    = note: this error originates in the macro `uri` (in Nightly builds, run with -Z macro-backtrace for more info)
 
@@ -97,10 +97,10 @@ error: unexpected token
    |                ^
 
 error: unexpected end of input, expected expression
-  --> tests/ui-fail-stable/typed-uris-invalid-syntax.rs:28:16
+  --> tests/ui-fail-stable/typed-uris-invalid-syntax.rs:28:22
    |
 28 |     uri!(simple(id = ));
-   |                ^^^^^^^
+   |                      ^
 
 error: invalid URI: unexpected EOF: expected some token at index 0
   --> tests/ui-fail-stable/typed-uris-invalid-syntax.rs:29:10
@@ -145,7 +145,7 @@ error: URI suffix must contain only query and/or fragment
    |                         ^^^^^^^^^
 
 error: route expects 2 parameters but 0 were supplied
-  --- note: route `simple` has uri "/<id>/<name>"
+         --- note: route `simple` has uri "/<id>/<name>"
   --> tests/ui-fail-stable/typed-uris-invalid-syntax.rs:13:10
    |
 13 |     uri!(simple,);

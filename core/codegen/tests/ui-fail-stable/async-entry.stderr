@@ -27,7 +27,7 @@ error: [note] this function must be `async`
    |     ^^
 
 error: attribute cannot be applied to `main` function
-  --- note: this attribute generates a `main` function
+         --- note: this attribute generates a `main` function
   --> tests/ui-fail-stable/async-entry.rs:49:5
    |
 49 |     #[rocket::launch]
@@ -70,7 +70,7 @@ error: [note] this function must return a value
    |     ^^
 
 error: attribute cannot be applied to `main` function
-  --- note: this attribute generates a `main` function
+         --- note: this attribute generates a `main` function
   --> tests/ui-fail-stable/async-entry.rs:79:5
    |
 79 |     #[rocket::launch]
@@ -85,7 +85,7 @@ error: [note] this function cannot be `main`
    |        ^^^^
 
 error: attribute cannot be applied to `main` function
-  --- note: this attribute generates a `main` function
+         --- note: this attribute generates a `main` function
   --> tests/ui-fail-stable/async-entry.rs:87:5
    |
 87 |     #[rocket::launch]

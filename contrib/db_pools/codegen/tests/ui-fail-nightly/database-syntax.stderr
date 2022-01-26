@@ -1,17 +1,3 @@
-warning: field is never read: `query_segs`
-  --> $WORKSPACE/core/lib/src/route/uri.rs
-   |
-   |     pub query_segs: Vec<Segment>,
-   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-   |
-   = note: `#[warn(dead_code)]` on by default
-note: `Metadata` has derived impls for the traits `Clone` and `Debug`, but these are intentionally ignored during dead code analysis
-  --> $WORKSPACE/core/lib/src/route/uri.rs
-   |
-   | #[derive(Debug, Clone)]
-   |          ^^^^^  ^^^^^
-   = note: this warning originates in the derive macro `Debug` (in Nightly builds, run with -Z macro-backtrace for more info)
-
 error: invalid value: expected string literal
  --> tests/ui-fail-nightly/database-syntax.rs:4:12
   |
