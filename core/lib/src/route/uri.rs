@@ -77,13 +77,14 @@ pub(crate) enum Color {
     Wild = 1,
 }
 
+#[allow(dead_code)] // reason = TODO: maybe there will come some usage
 #[derive(Debug, Clone)]
 pub(crate) struct Metadata {
     /// Segments in the base.
     pub base_segs: Vec<Segment>,
     /// Segments in the path, including base.
     pub path_segs: Vec<Segment>,
-    /// Segments in the query.
+    /// Segments in the query. TODO: remove it if there is no purpose coming.
     pub query_segs: Vec<Segment>,
     /// `(name, value)` of the query segments that are static.
     pub static_query_fields: Vec<(String, String)>,

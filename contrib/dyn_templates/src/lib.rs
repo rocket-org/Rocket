@@ -12,7 +12,7 @@
 //!
 //!      ```toml
 //!      [dependencies.rocket_dyn_templates]
-//!      version = "0.1.0-rc.1"
+//!      version = "0.1.0-rc.2"
 //!      features = ["handlebars", "tera"]
 //!      ```
 //!
@@ -26,6 +26,7 @@
 //!
 //!      ```rust
 //!      # #[macro_use] extern crate rocket;
+//!      use std::collections::HashMap;
 //!      use rocket_dyn_templates::Template;
 //!
 //!      #[launch]
@@ -35,7 +36,7 @@
 //!
 //!      #[get("/")]
 //!      fn index() -> Template {
-//!          # let context = ();
+//!          let context: HashMap<&str, &str> = HashMap::new();
 //!          Template::render("template-name", &context)
 //!      }
 //!      ```
@@ -76,11 +77,11 @@
 //!
 //! | Engine       | Version | Extension |
 //! |--------------|---------|-----------|
-//! | [Tera]       | 1       | `.tera`   |
-//! | [Handlebars] | 4       | `.hbs`    |
+//! | [Tera]       | 1.15    | `.tera`   |
+//! | [Handlebars] | 4.2     | `.hbs`    |
 //!
-//! [Tera]: https://docs.rs/crate/tera/1
-//! [Handlebars]: https://docs.rs/crate/handlebars/4
+//! [Tera]: https://docs.rs/crate/tera/1.15
+//! [Handlebars]: https://docs.rs/crate/handlebars/4.2
 //!
 //! Any file that ends with one of these extension will be discovered and
 //! rendered with the corresponding templating engine. The _name_ of the
@@ -368,8 +369,7 @@ impl Template {
     ///     let client = Client::untracked(rocket).expect("valid rocket");
     ///
     ///     // Create a `context`. Here, just an empty `HashMap`.
-    ///     let mut context = HashMap::new();
-    ///     # context.insert("test", "test");
+    ///     let context: HashMap<&str, &str> = HashMap::new();
     ///     let template = Template::show(client.rocket(), "index", context);
     /// }
     /// ```
@@ -528,7 +528,7 @@ macro_rules! context {
 
         #[allow(non_camel_case_types)]
         impl<$($key: Serialize),*> Serialize for ContextMacroCtxObject<$($key),*> {
-            fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+            fn serialize<S>(&self, serializer: S) -> ::std::result::Result<S::Ok, S::Error>
                 where S: Serializer,
             {
                 let mut map = serializer.serialize_map(None)?;

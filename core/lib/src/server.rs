@@ -444,6 +444,7 @@ impl Rocket<Orbit> {
             let rocket = rocket.clone();
             let connection = ConnectionMeta {
                 remote: conn.peer_address(),
+                #[cfg(feature = "tls")]
                 client_certificates: conn.peer_certificates().map(Arc::new),
             };
 

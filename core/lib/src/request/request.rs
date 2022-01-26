@@ -16,6 +16,7 @@ use crate::data::Limits;
 use crate::http::{hyper, Method, Header, HeaderMap};
 use crate::http::{ContentType, Accept, MediaType, CookieJar, Cookie};
 use crate::http::uncased::UncasedStr;
+#[cfg(feature = "tls")]
 use crate::http::private::RawCertificate;
 use crate::http::uri::{fmt::Path, Origin, Segments, Host, Authority};
 
@@ -37,6 +38,7 @@ pub struct Request<'r> {
 #[derive(Clone)]
 pub(crate) struct ConnectionMeta {
     pub remote: Option<SocketAddr>,
+    #[cfg(feature = "tls")]
     pub client_certificates: Option<Arc<Vec<RawCertificate>>>,
 }
 
@@ -91,6 +93,7 @@ impl<'r> Request<'r> {
             headers: HeaderMap::new(),
             connection: ConnectionMeta {
                 remote: None,
+                #[cfg(feature = "tls")]
                 client_certificates: None,
             },
             state: RequestState {
@@ -713,10 +716,11 @@ impl<'r> Request<'r> {
     /// # let request = c.get("/");
     /// // The first store into local cache for a given type wins.
     /// let value = request.local_cache(|| "hello");
-    /// assert_eq!(*request.local_cache(|| "hello"), "hello");
+    /// assert_eq!(value, &"hello");
+    /// assert_eq!(request.local_cache(|| "hello"), &"hello");
     ///
     /// // The following return the cached, previously stored value for the type.
-    /// assert_eq!(*request.local_cache(|| "goodbye"), "hello");
+    /// assert_eq!(request.local_cache(|| "goodbye"), &"hello");
     /// ```
     #[inline]
     pub fn local_cache<T, F>(&self, f: F) -> &T
@@ -764,6 +768,40 @@ impl<'r> Request<'r> {
                 self.state.cache.get()
             }
         }
+    }
+
+    /// Retrieves the cached value for type `T` from the request-local cached
+    /// state of `self`. If no such value has previously been cached for this
+    /// request, `None` is returned.
+    ///
+    /// Different values of the same type _cannot_ be cached without using a
+    /// proxy, wrapper type.
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// # let c = rocket::local::blocking::Client::debug_with(vec![]).unwrap();
+    /// # let request = c.get("/");
+    /// // Without cached value it is None
+    /// let value: Option<&String> = request.try_local_cache();
+    /// assert_eq!(value, None);
+    /// // The first store into local cache for a given type wins.
+    /// let value = request.local_cache(|| String::from("hello"));
+    /// assert_eq!(value.as_str(), "hello");
+    ///
+    /// assert_eq!(request.try_local_cache(), Some(&String::from("hello")));
+    ///
+    /// // The following return the cached, previously stored value for the type.
+    /// assert_eq!(request.local_cache(|| String::from("goodbye")).as_str(), "hello");
+    /// // This is also the first cached value
+    /// assert_eq!(request.try_local_cache(), Some(&String::from("hello")));
+    /// ```
+    #[inline]
+    pub fn try_local_cache<T>(&self) -> Option<&T>
+    where
+        T: Send + Sync + 'static,
+    {
+        self.state.cache.try_get()
     }
 
     /// Retrieves and parses into `T` the 0-indexed `n`th non-empty segment from

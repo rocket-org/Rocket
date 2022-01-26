@@ -1,6 +1,6 @@
 [package]
 name = "rocket_dyn_templates"
-version = "0.1.0-rc.1"
+version = "0.1.0-rc.2"
 authors = ["Sergio Benitez <sb@sergio.bz>"]
 description = "Dynamic templating engine integration for Rocket."
 documentation = "https://api.rocket.rs/v0.5-rc/rocket_dyn_templates/"
@@ -17,22 +17,22 @@ handlebars = ["handlebars_"]
 
 [dependencies]
 glob = "0.3"
-notify = "4.0.6"
+notify = "4.0"
 normpath = "0.3"
 
 [dependencies.rocket]
-version = "0.5.0-rc.1"
+version = "0.5.0-rc.2"
 path = "../../core/lib"
 default-features = false
 
 [dependencies.tera_]
 package = "tera"
-version = "1.10.0"
+version = "1.15"
 optional = true
 
 [dependencies.handlebars_]
 package = "handlebars"
-version = "4.1"
+version = "4.2"
 optional = true
 
 [package.metadata.docs.rs]

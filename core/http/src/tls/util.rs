@@ -1,6 +1,6 @@
 use std::io::{self, Cursor, Read};
 
-use rustls::{internal::pemfile, Certificate, PrivateKey, RootCertStore};
+use tokio_rustls::rustls::{self, Certificate, PrivateKey, RootCertStore};
 
 fn err(message: impl Into<std::borrow::Cow<'static, str>>) -> io::Error {
     io::Error::new(io::ErrorKind::Other, message.into())
@@ -8,10 +8,11 @@ fn err(message: impl Into<std::borrow::Cow<'static, str>>) -> io::Error {
 
 /// Loads certificates from `reader`.
 pub fn load_certs(reader: &mut dyn io::BufRead) -> io::Result<Vec<Certificate>> {
-    pemfile::certs(reader).map_err(|_| err("invalid certificate"))
+    let der_cert_data = rustls_pemfile::certs(reader).map_err(|_| err("invalid certificate"))?;
+    Ok(der_cert_data.into_iter().map(Certificate).collect())
 }
 
-/// Load and decode the private key  from `reader`.
+/// Load and decode the private key from `reader`.
 pub fn load_private_key(reader: &mut dyn io::BufRead) -> io::Result<PrivateKey> {
     // "rsa" (PKCS1) PEM files have a different first-line header than PKCS8
     // PEM files, use that to determine the parse function to use.
@@ -19,16 +20,16 @@ pub fn load_private_key(reader: &mut dyn io::BufRead) -> io::Result<PrivateKey> 
     reader.read_line(&mut first_line)?;
 
     let private_keys_fn = match first_line.trim_end() {
-        "-----BEGIN RSA PRIVATE KEY-----" => pemfile::rsa_private_keys,
-        "-----BEGIN PRIVATE KEY-----" => pemfile::pkcs8_private_keys,
-        _ => return Err(err("invalid key header"))
+        "-----BEGIN RSA PRIVATE KEY-----" => rustls_pemfile::rsa_private_keys,
+        "-----BEGIN PRIVATE KEY-----" => rustls_pemfile::pkcs8_private_keys,
+        _ => return Err(err("invalid key header")),
     };
 
     let key = private_keys_fn(&mut Cursor::new(first_line).chain(reader))
         .map_err(|_| err("invalid key file"))
         .and_then(|mut keys| match keys.len() {
             0 => Err(err("no valid keys found; is the file malformed?")),
-            1 => Ok(keys.remove(0)),
+            1 => Ok(PrivateKey(keys.remove(0))),
             n => Err(err(format!("expected 1 key, found {}", n))),
         })?;
 
@@ -41,12 +42,14 @@ pub fn load_private_key(reader: &mut dyn io::BufRead) -> io::Result<PrivateKey> 
 /// Load and decode CA certificates from `reader`.
 pub fn load_ca_certs(reader: &mut dyn io::BufRead) -> io::Result<RootCertStore> {
     let mut roots = rustls::RootCertStore::empty();
-    let (_, e) = roots.add_pem_file(reader).map_err(|_| err("PEM format error"))?;
-    if e != 0 {
-        return Err(err("validity checks failed"));
-    }
+    let certs = rustls_pemfile::certs(reader).map_err(|_| err("invalid ca certificate"))?;
 
-    Ok(roots)
+    let (_, e_count) = roots.add_parsable_certificates(certs.as_slice());
+    if e_count != 0 {
+        Err(err("validity checks failed"))
+    } else {
+        Ok(roots)
+    }
 }
 
 #[cfg(test)]
@@ -55,8 +58,12 @@ mod test {
 
     macro_rules! tls_example_key {
         ($k:expr) => {
-            include_bytes!(concat!(env!("CARGO_MANIFEST_DIR"), "/../../examples/tls/private/", $k))
-        }
+            include_bytes!(concat!(
+                env!("CARGO_MANIFEST_DIR"),
+                "/../../examples/tls/private/",
+                $k
+            ))
+        };
     }
 
     #[test]

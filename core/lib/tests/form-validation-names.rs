@@ -65,6 +65,16 @@ fn test_form_validation_context() {
         count(c, n, kind, false)
     }
 
+    // check if parse works and get rid of unused warnings
+    let mut ok_str = String::from("cats[0].name=BobDerStreuner&cats[0].nick=kitty");
+    ok_str += "&kitty.name=HiKitty&kitty.nick=kitty&dog.name=Bulldog";
+    let person = Form::<Person>::parse(&ok_str).expect("parse");
+    let _ = person.cats;
+    let _ = person.dog.name;
+    let _ = person.kitty.name;
+    let _ = person.kitty.nick;
+
+    // check validation
     let c = errors::<Cat>("name=littlebobby");
     assert_eq!(exact(&c, "nick", Missing), 1);
     assert_eq!(fuzzy(&c, "nick", Missing), 1);
@@ -128,11 +138,3 @@ fn test_form_validation_context() {
     assert_eq!(exact(&c, "cats", InvalidLength { min: Some(1), max: None }), 1);
     assert_eq!(fuzzy(&c, "cats[0].name", None), 1);
 }
-
-// #[derive(Debug, FromForm)]
-// struct Person<'v> {
-//     kitty: Cat<'v>,
-//     #[field(validate = len(1..))]
-//     cats: Vec<Cat<'v>>,
-//     dog: Dog<'v>,
-// }

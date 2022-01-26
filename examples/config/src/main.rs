@@ -15,6 +15,7 @@ struct AppConfig {
 
 #[get("/")]
 fn read_config(rocket_config: &Config, app_config: &State<AppConfig>) -> String {
+    let (_, _) = (&app_config.key, &app_config.port);
     format!("{:#?}\n{:#?}", app_config, rocket_config)
 }
 

@@ -1,11 +1,11 @@
 pub mod oid {
     //! Lower-level OID types re-exported from
-    //! [`oid_registry`](https://docs.rs/oid-registry/0.1) and
-    //! [`der-parser`](https://docs.rs/der-parser/5).
+    //! [`oid_registry`](https://docs.rs/oid-registry/0.2) and
+    //! [`der-parser`](https://docs.rs/der-parser/6.0).
 
-    pub use x509_parser::oid_registry::*;
     pub use x509_parser::der_parser::oid::*;
     pub use x509_parser::objects::*;
+    pub use x509_parser::oid_registry::*;
 }
 
 pub mod bigint {
@@ -16,31 +16,34 @@ pub mod bigint {
 
 pub mod x509 {
     //! Lower-level X.509 types re-exported from
-    //! [`x509_parser`](https://docs.rs/x509-parser/0.9).
+    //! [`x509_parser`](https://docs.rs/x509-parser/0.12).
     //!
     //! Lack of documentation is directly inherited from the source crate.
     //! Prefer to use Rocket's wrappers when possible.
 
     pub use x509_parser::certificate::*;
     pub use x509_parser::cri_attributes::*;
+    pub use x509_parser::der_parser::ber;
+    pub use x509_parser::der_parser::der;
     pub use x509_parser::error::*;
     pub use x509_parser::extensions::*;
     pub use x509_parser::revocation_list::*;
     pub use x509_parser::time::*;
     pub use x509_parser::x509::*;
-    pub use x509_parser::der_parser::der;
-    pub use x509_parser::der_parser::ber;
 }
 
-use std::fmt;
-use std::ops::Deref;
 use std::collections::HashMap;
+use std::fmt;
 use std::num::NonZeroUsize;
+use std::ops::Deref;
 
 use ref_cast::RefCast;
-use x509_parser::nom;
-use x509::{ParsedExtension, X509Name, X509Certificate, TbsCertificate, X509Error};
-use oid::OID_X509_EXT_SUBJECT_ALT_NAME as SUBJECT_ALT_NAME;
+use x509::{ParsedExtension, TbsCertificate, X509Certificate, X509Error, X509Name};
+use x509_parser::{
+    extensions::X509Extension,
+    nom::{self, Parser},
+    prelude::{FromDer, X509CertificateParser},
+};
 
 use crate::listener::RawCertificate;
 
@@ -75,11 +78,8 @@ pub enum Error {
     NoSubject,
     /// There is no subject and the subjectAlt is not marked as critical.
     NonCriticalSubjectAlt,
-    // FIXME: Waiting on https://github.com/rusticata/x509-parser/pull/92.
-    // Parse(X509Error),
     /// An error occurred while parsing the certificate.
-    #[doc(hidden)]
-    Parse(String),
+    Parse(X509Error),
     /// The certificate parsed partially but is incomplete.
     ///
     /// If `Some(n)`, then `n` more bytes were expected. Otherwise, the number
@@ -196,14 +196,18 @@ pub struct Name<'a>(X509Name<'a>);
 
 impl<'a> Certificate<'a> {
     fn parse_one(raw: &[u8]) -> Result<X509Certificate<'_>> {
-        let (left, x509) = X509Certificate::from_der(raw)?;
-        if !left.is_empty() {
-            return Err(Error::Trailing(left.len()));
+        let mut parser = X509CertificateParser::new().with_deep_parse_extensions(false);
+        let (rem, x509) = parser.parse(raw)?;
+        if !rem.is_empty() {
+            return Err(Error::Trailing(rem.len()));
         }
 
         if x509.subject().as_raw().is_empty() {
-            if let Some(ext) = x509.extensions().get(&SUBJECT_ALT_NAME) {
-                if !matches!(ext.parsed_extension(), ParsedExtension::SubjectAlternativeName(..)) {
+            if let Ok((_rem, ext)) = X509Extension::from_der(raw) {
+                if !matches!(
+                    ext.parsed_extension(),
+                    ParsedExtension::SubjectAlternativeName(..)
+                ) {
                     return Err(Error::NoSubject);
                 } else if !ext.critical {
                     return Err(Error::NonCriticalSubjectAlt);
@@ -226,7 +230,7 @@ impl<'a> Certificate<'a> {
     pub fn parse(chain: &[RawCertificate]) -> Result<Certificate<'_>> {
         match chain.first() {
             Some(cert) => Certificate::parse_one(&cert.0).map(Certificate),
-            None => Err(Error::Empty)
+            None => Err(Error::Empty),
         }
     }
 
@@ -314,13 +318,55 @@ impl<'a> Certificate<'a> {
     ///
     /// ```rust
     /// # extern crate rocket;
-    /// # use rocket::get;
+    /// use rocket::get;
     /// use rocket::mtls::{oid, x509, Certificate};
     ///
     /// #[get("/auth")]
     /// fn auth(cert: Certificate<'_>) {
     ///     let subject_alt = cert.extensions()
     ///         .get(&oid::OID_X509_EXT_SUBJECT_ALT_NAME)
+    ///         .and_then(|e| match e.parsed_extension() {
+    ///             x509::ParsedExtension::SubjectAlternativeName(s) => {
+    ///                 Some(s.clone())
+    ///             }
+    ///             _ => None
+    ///         });
+    ///
+    ///     if let Some(subject_alt) = subject_alt {
+    ///         for name in &subject_alt.general_names {
+    ///             if let x509::GeneralName::RFC822Name(name) = name {
+    ///                 println!("An email, perhaps? {}", name);
+    ///             }
+    ///         }
+    ///     }
+    /// }
+    /// ```
+    #[deprecated(since = "0.5.0-rc.2", note = "use find_extension(&oid::Oid)")]
+    pub fn extensions(&self) -> HashMap<oid::Oid<'a>, x509::X509Extension<'a>> {
+        let extensions: HashMap<oid::Oid<'a>, x509::X509Extension<'a>> = self
+            .inner()
+            .extensions()
+            .iter()
+            .map(|ext| (ext.oid.clone(), ext.clone()))
+            .collect();
+        extensions
+    }
+
+    /// Searches for an extension with the given [`oid::Oid`].
+    ///
+    /// Note: if there are several extensions with the same Oid, the first one is returned.
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// # extern crate rocket;
+    /// use rocket::get;
+    /// use rocket::mtls::{oid, x509, Certificate};
+    ///
+    /// #[get("/auth")]
+    /// fn auth(cert: Certificate<'_>) {
+    ///     let subject_alt = cert
+    ///         .find_extension(&oid::OID_X509_EXT_SUBJECT_ALT_NAME)
     ///         .and_then(|e| match e.parsed_extension() {
     ///             x509::ParsedExtension::SubjectAlternativeName(s) => Some(s),
     ///             _ => None
@@ -335,8 +381,8 @@ impl<'a> Certificate<'a> {
     ///     }
     /// }
     /// ```
-    pub fn extensions(&self) -> &HashMap<oid::Oid<'a>, x509::X509Extension<'a>> {
-        &self.inner().extensions
+    pub fn find_extension(&self, oid: &oid::Oid<'a>) -> Option<&x509::X509Extension<'a>> {
+        self.inner().find_extension(oid)
     }
 
     /// Checks if the certificate has the serial number `number`.
@@ -419,7 +465,8 @@ impl<'a> Name<'a> {
     /// }
     /// ```
     pub fn common_names(&self) -> impl Iterator<Item = &'a str> + '_ {
-        self.iter_by_oid(&oid::OID_X509_COMMON_NAME).filter_map(|n| n.as_str().ok())
+        self.iter_by_oid(&oid::OID_X509_COMMON_NAME)
+            .filter_map(|n| n.as_str().ok())
     }
 
     /// Returns the _first_ UTF-8 _string_ email address, if any.
@@ -466,7 +513,8 @@ impl<'a> Name<'a> {
     /// }
     /// ```
     pub fn emails(&self) -> impl Iterator<Item = &'a str> + '_ {
-        self.iter_by_oid(&oid::OID_PKCS9_EMAIL_ADDRESS).filter_map(|n| n.as_str().ok())
+        self.iter_by_oid(&oid::OID_PKCS9_EMAIL_ADDRESS)
+            .filter_map(|n| n.as_str().ok())
     }
 
     /// Returns `true` if `self` has no data.
@@ -522,12 +570,13 @@ impl From<nom::Err<X509Error>> for Error {
         match e {
             nom::Err::Incomplete(nom::Needed::Unknown) => Error::Incomplete(None),
             nom::Err::Incomplete(nom::Needed::Size(n)) => Error::Incomplete(Some(n)),
-            nom::Err::Error(e) | nom::Err::Failure(e) => Error::Parse(e.to_string()),
+            nom::Err::Error(e) | nom::Err::Failure(e) => Error::Parse(e),
         }
     }
 }
 
 impl std::error::Error for Error {
+    // TODO: do we need this impl and need to provide here anything or remove it?!
     // fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
     //     match self {
     //         Error::Parse(e) => Some(e),

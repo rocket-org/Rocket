@@ -149,7 +149,7 @@ async fn files(file: PathBuf) -> Option<NamedFile> {
 }
 ```
 
-[path traversal attacks]: https://www.owasp.org/index.php/Path_Traversal
+[path traversal attacks]: https://owasp.org/www-community/attacks/Path_Traversal
 
 ! tip: Rocket makes it even _easier_ to serve static files!
 
@@ -1716,12 +1716,13 @@ form field.
 
 ### Static Parameters
 
-A request matches a route _iff_ its query string contains all of the static
+A request matches a route [_iff_](https://en.wikipedia.org/wiki/If_and_only_if)
+its query string contains all of the static
 parameters in the route's query string. A route with a static parameter `param`
 (any UTF-8 text string) in a query will only match requests with that exact path
 segment in its query string.
 
-! note: This is truly an _iff_!
+! note: This is truly an [_iff_](https://en.wikipedia.org/wiki/If_and_only_if)!
 
   Only the static parameters in query route string affect routing. Dynamic
   parameters are allowed to be missing by default.

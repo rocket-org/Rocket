@@ -4,13 +4,24 @@
 //!
 //! # Enabling
 //!
-//! This module is only available when the `json` feature is enabled. Enable it
+//! This module is only available when the `msgpack` feature is enabled. Enable it
 //! in `Cargo.toml` as follows:
 //!
 //! ```toml
 //! [dependencies.rocket]
-//! version = "0.5.0-rc.1"
+//! version = "0.5.0-rc.2"
 //! features = ["msgpack"]
+//! ```
+//!
+//! If you prefer a compact format of `MsgPack` in your `Response`,
+//! this won't have any field description and your client needs to know
+//! before about the data structure,
+//! use feature `msgpack-compact`:
+//!
+//! ```toml
+//! [dependencies.rocket]
+//! version = "0.5.0-rc.2"
+//! features = ["msgpack-compact"]
 //! ```
 //!
 //! # Testing
@@ -27,14 +38,14 @@
 use std::io;
 use std::ops::{Deref, DerefMut};
 
-use crate::request::{Request, local_cache};
-use crate::data::{Limits, Data, FromData, Outcome};
-use crate::response::{self, Responder, content};
-use crate::http::Status;
+use crate::data::{Data, FromData, Limits, Outcome};
 use crate::form::prelude as form;
+use crate::http::Status;
+use crate::request::{local_cache, Request};
+use crate::response::{self, content, Responder};
 // use crate::http::uri::fmt;
 
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 
 #[doc(inline)]
 pub use rmp_serde::decode::Error;
@@ -153,8 +164,11 @@ impl<'r, T: Deserialize<'r>> MsgPack<T> {
             Ok(buf) if buf.is_complete() => buf.into_inner(),
             Ok(_) => {
                 let eof = io::ErrorKind::UnexpectedEof;
-                return Err(Error::InvalidDataRead(io::Error::new(eof, "data limit exceeded")));
-            },
+                return Err(Error::InvalidDataRead(io::Error::new(
+                    eof,
+                    "data limit exceeded",
+                )));
+            }
             Err(e) => return Err(Error::InvalidDataRead(e)),
         };
 
@@ -171,13 +185,12 @@ impl<'r, T: Deserialize<'r>> FromData<'r> for MsgPack<T> {
             Ok(value) => Outcome::Success(value),
             Err(Error::InvalidDataRead(e)) if e.kind() == io::ErrorKind::UnexpectedEof => {
                 Outcome::Failure((Status::PayloadTooLarge, Error::InvalidDataRead(e)))
-            },
-            | Err(e@Error::TypeMismatch(_))
-            | Err(e@Error::OutOfRange)
-            | Err(e@Error::LengthMismatch(_))
-            => {
+            }
+            Err(e @ Error::TypeMismatch(_))
+            | Err(e @ Error::OutOfRange)
+            | Err(e @ Error::LengthMismatch(_)) => {
                 Outcome::Failure((Status::UnprocessableEntity, e))
-            },
+            }
             Err(e) => Outcome::Failure((Status::BadRequest, e)),
         }
     }
@@ -188,11 +201,15 @@ impl<'r, T: Deserialize<'r>> FromData<'r> for MsgPack<T> {
 /// serialization fails, an `Err` of `Status::InternalServerError` is returned.
 impl<'r, T: Serialize> Responder<'r, 'static> for MsgPack<T> {
     fn respond_to(self, req: &'r Request<'_>) -> response::Result<'static> {
-        let buf = rmp_serde::to_vec(&self.0)
-            .map_err(|e| {
-                error_!("MsgPack failed to serialize: {:?}", e);
-                Status::InternalServerError
-            })?;
+        #[cfg(feature = "msgpack-compact")]
+        let res_vec = to_vec_compact(&self.0);
+        #[cfg(not(feature = "msgpack-compact"))]
+        let res_vec = to_vec_named(&self.0);
+
+        let buf = res_vec.map_err(|e| {
+            error_!("MsgPack failed to serialize: {:?}", e);
+            Status::InternalServerError
+        })?;
 
         content::RawMsgPack(buf).respond_to(req)
     }
@@ -204,13 +221,13 @@ impl<'v, T: Deserialize<'v> + Send> form::FromFormField<'v> for MsgPack<T> {
     // decode it into bytes as opposed to a string as it won't be UTF-8.
 
     async fn from_data(f: form::DataField<'v, '_>) -> Result<Self, form::Errors<'v>> {
-        Self::from_data(f.request, f.data).await.map_err(|e| {
-            match e {
+        Self::from_data(f.request, f.data)
+            .await
+            .map_err(|e| match e {
                 Error::InvalidMarkerRead(e) | Error::InvalidDataRead(e) => e.into(),
                 Error::Utf8Error(e) => e.into(),
                 _ => form::Error::custom(e).into(),
-            }
-        })
+            })
     }
 }
 
@@ -278,9 +295,53 @@ impl<T> DerefMut for MsgPack<T> {
 /// otherwise.
 #[inline(always)]
 pub fn from_slice<'a, T>(v: &'a [u8]) -> Result<T, Error>
-    where T: Deserialize<'a>,
+where
+    T: Deserialize<'a>,
 {
     rmp_serde::from_read_ref(v)
+}
+
+/// Serialize a `T` into a MessagePack byte vector with compact representation.
+///
+/// The compact representation represents structs as arrays.
+///
+/// **_Always_ use [`MsgPack`] to serialize MessagePack response data.**
+///
+/// # Deprecated
+///
+/// To match the provided API of crate rmp-serde and to prevent misunderstanding
+/// between `msgpack::to_vec()` and `rmp_serde::to_vec()` there are new
+/// functions `msgpack::to_vec_compact()` and `msgpack::to_vec_named()`.
+///
+/// # Example
+///
+/// ```
+/// use rocket::serde::{msgpack, Deserialize, Serialize};
+///
+/// #[derive(Debug, Deserialize, PartialEq, Serialize)]
+/// #[serde(crate = "rocket::serde")]
+/// struct Data<'r> {
+///     framework: &'r str,
+///     stars: usize,
+/// }
+///
+/// let bytes = &[146, 166, 82, 111, 99, 107, 101, 116, 5];
+/// let data: Data = msgpack::from_slice(bytes).unwrap();
+/// let byte_vec = msgpack::to_compact_vec(&data).unwrap();
+/// assert_eq!(bytes, &byte_vec[..]);
+/// assert_eq!(data, Data { framework: "Rocket", stars: 5 });
+/// ```
+///
+/// # Errors
+///
+/// Serialization fails if `T`'s `Serialize` implementation fails.
+#[deprecated(since = "0.5.0-rc.2", note = "use to_vec_compact()")]
+#[inline(always)]
+pub fn to_compact_vec<T>(value: &T) -> Result<Vec<u8>, rmp_serde::encode::Error>
+where
+    T: Serialize + ?Sized,
+{
+    rmp_serde::to_vec(value)
 }
 
 /// Serialize a `T` into a MessagePack byte vector with compact representation.
@@ -292,9 +353,9 @@ pub fn from_slice<'a, T>(v: &'a [u8]) -> Result<T, Error>
 /// # Example
 ///
 /// ```
-/// use rocket::serde::{Deserialize, Serialize, msgpack};
+/// use rocket::serde::{msgpack, Deserialize, Serialize};
 ///
-/// #[derive(Deserialize, Serialize)]
+/// #[derive(Debug, Deserialize, PartialEq, Serialize)]
 /// #[serde(crate = "rocket::serde")]
 /// struct Data<'r> {
 ///     framework: &'r str,
@@ -303,16 +364,18 @@ pub fn from_slice<'a, T>(v: &'a [u8]) -> Result<T, Error>
 ///
 /// let bytes = &[146, 166, 82, 111, 99, 107, 101, 116, 5];
 /// let data: Data = msgpack::from_slice(bytes).unwrap();
-/// let byte_vec = msgpack::to_compact_vec(&data).unwrap();
+/// let byte_vec = msgpack::to_vec_compact(&data).unwrap();
 /// assert_eq!(bytes, &byte_vec[..]);
+/// assert_eq!(data, Data { framework: "Rocket", stars: 5 });
 /// ```
 ///
 /// # Errors
 ///
 /// Serialization fails if `T`'s `Serialize` implementation fails.
 #[inline(always)]
-pub fn to_compact_vec<T>(value: &T) -> Result<Vec<u8>, rmp_serde::encode::Error>
-    where T: Serialize + ?Sized
+pub fn to_vec_compact<T>(value: &T) -> Result<Vec<u8>, rmp_serde::encode::Error>
+where
+    T: Serialize + ?Sized,
 {
     rmp_serde::to_vec(value)
 }
@@ -323,12 +386,18 @@ pub fn to_compact_vec<T>(value: &T) -> Result<Vec<u8>, rmp_serde::encode::Error>
 ///
 /// **_Always_ use [`MsgPack`] to serialize MessagePack response data.**
 ///
+/// # Deprecated
+///
+/// To match the provided API of crate rmp-serde and to prevent misunderstanding
+/// between `msgpack::to_vec()` and `rmp_serde::to_vec()` there are new
+/// functions `msgpack::to_vec_compact()` and `msgpack::to_vec_named()`.
+///
 /// # Example
 ///
 /// ```
-/// use rocket::serde::{Deserialize, Serialize, msgpack};
+/// use rocket::serde::{msgpack, Deserialize, Serialize};
 ///
-/// #[derive(Deserialize, Serialize)]
+/// #[derive(Debug, Deserialize, PartialEq, Serialize)]
 /// #[serde(crate = "rocket::serde")]
 /// struct Data<'r> {
 ///     framework: &'r str,
@@ -343,14 +412,57 @@ pub fn to_compact_vec<T>(value: &T) -> Result<Vec<u8>, rmp_serde::encode::Error>
 /// let data: Data = msgpack::from_slice(bytes).unwrap();
 /// let byte_vec = msgpack::to_vec(&data).unwrap();
 /// assert_eq!(bytes, &byte_vec[..]);
+/// assert_eq!(data, Data { framework: "Rocket", stars: 5 });
+/// ```
+///
+/// # Errors
+///
+/// Serialization fails if `T`'s `Serialize` implementation fails.
+#[deprecated(since = "0.5.0-rc.2", note = "use to_vec_named()")]
+#[inline(always)]
+pub fn to_vec<T>(value: &T) -> Result<Vec<u8>, rmp_serde::encode::Error>
+where
+    T: Serialize + ?Sized,
+{
+    rmp_serde::to_vec_named(value)
+}
+
+/// Serialize a `T` into a MessagePack byte vector with named representation.
+///
+/// The named representation represents structs as maps with field names.
+///
+/// **_Always_ use [`MsgPack`] to serialize MessagePack response data.**
+///
+/// # Example
+///
+/// ```
+/// use rocket::serde::{msgpack, Deserialize, Serialize};
+///
+/// #[derive(Debug, Deserialize, PartialEq, Serialize)]
+/// #[serde(crate = "rocket::serde")]
+/// struct Data<'r> {
+///     framework: &'r str,
+///     stars: usize,
+/// }
+///
+/// let bytes = &[
+///     130, 169, 102, 114, 97, 109, 101, 119, 111, 114, 107, 166, 82, 111,
+///     99, 107, 101, 116, 165, 115, 116, 97, 114, 115, 5
+/// ];
+///
+/// let data: Data = msgpack::from_slice(bytes).unwrap();
+/// let byte_vec = msgpack::to_vec_named(&data).unwrap();
+/// assert_eq!(bytes, &byte_vec[..]);
+/// assert_eq!(data, Data { framework: "Rocket", stars: 5 });
 /// ```
 ///
 /// # Errors
 ///
 /// Serialization fails if `T`'s `Serialize` implementation fails.
 #[inline(always)]
-pub fn to_vec<T>(value: &T) -> Result<Vec<u8>, rmp_serde::encode::Error>
-    where T: Serialize + ?Sized
+pub fn to_vec_named<T>(value: &T) -> Result<Vec<u8>, rmp_serde::encode::Error>
+where
+    T: Serialize + ?Sized,
 {
     rmp_serde::to_vec_named(value)
 }

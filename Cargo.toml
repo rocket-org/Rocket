@@ -6,7 +6,11 @@ members = [
   "contrib/db_pools/codegen/",
   "contrib/db_pools/lib/",
   "contrib/sync_db_pools/codegen/",
+  "contrib/sync_db_pools/codegen-diesel-tests",
   "contrib/sync_db_pools/lib/",
   "contrib/dyn_templates/",
   "site/tests",
 ]
+
+[patch.crates-io]
+chrono = { git = "https://github.com/timvisee/chrono.git", rev = "5292db8" }

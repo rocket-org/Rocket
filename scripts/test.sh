@@ -1,6 +1,15 @@
 #!/usr/bin/env bash
 set -e
 
+# set CARGO before sourcing config.sh
+CARGO="cargo"
+RUSTC="rustc"
+if [[ $1 == +* ]]; then
+  CARGO="$CARGO $1"
+  RUSTC="$RUSTC $1"
+  shift
+fi
+
 # Brings in _ROOT, _DIR, _DIRS globals.
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 source "${SCRIPT_DIR}/config.sh"
@@ -8,7 +17,6 @@ source "${SCRIPT_DIR}/config.sh"
 # Add Cargo to PATH.
 export PATH=${HOME}/.cargo/bin:${PATH}
 export CARGO_INCREMENTAL=0
-CARGO="cargo"
 
 # Checks that the versions for Cargo projects $@ all match
 function check_versions_match() {
@@ -102,10 +110,19 @@ function test_contrib() {
     $CARGO test -p rocket_db_pools --no-default-features --features $feature $@
   done
 
+  echo ":: Building and testing rocket_db_pools_codegen..."
+  $CARGO test -p rocket_db_pools_codegen $@
+
   for feature in "${SYNC_DB_POOLS_FEATURES[@]}"; do
     echo ":: Building and testing sync_db_pools [$feature]..."
     $CARGO test -p rocket_sync_db_pools --no-default-features --features $feature $@
   done
+
+  echo ":: Building and testing rocket_sync_db_pools_codegen..."
+  $CARGO test -p rocket_sync_db_pools_codegen $@
+
+  echo ":: Building and testing rocket_sync_db_pools_codegen_diesel_tests..."
+  $CARGO test -p rocket_sync_db_pools_codegen_diesel_tests $@
 
   for feature in "${DYN_TEMPLATES_FEATURES[@]}"; do
     echo ":: Building and testing dyn_templates [$feature]..."
@@ -120,16 +137,20 @@ function test_core() {
     mtls
     json
     msgpack
+    msgpack-compact
     uuid
   )
 
+  RUSTDOCFLAGS="$RUSTDOCFLAGS"
+  [ -n "$RUST_NIGHTLY" ] && RUSTDOCFLAGS="-Zunstable-options --no-run $RUSTDOCFLAGS"
+
   echo ":: Building and checking core [no features]..."
-  RUSTDOCFLAGS="-Zunstable-options --no-run" \
+  RUSTDOCFLAGS="$RUSTDOCFLAGS" \
     indir "${CORE_LIB_ROOT}" $CARGO test --no-default-features $@
 
   for feature in "${FEATURES[@]}"; do
     echo ":: Building and checking core [${feature}]..."
-    RUSTDOCFLAGS="-Zunstable-options --no-run" \
+    RUSTDOCFLAGS="$RUSTDOCFLAGS" \
       indir "${CORE_LIB_ROOT}" $CARGO test --no-default-features --features "${feature}" $@
   done
 }
@@ -142,12 +163,57 @@ function test_examples() {
   echo ":: Building and testing examples..."
   indir "${EXAMPLES_DIR}" $CARGO update
   ROCKET_SECRET_KEY="itlYmFR2vYKrOmFhupMIn/hyB6lYCCTXz4yaQX89XVg=" \
-    indir "${EXAMPLES_DIR}" $CARGO test --all $@
-  }
+    indir "${EXAMPLES_DIR}" $CARGO test --workspace $@
+  indir "${EXAMPLES_DIR}/diesel" $CARGO update
+  ROCKET_SECRET_KEY="itlYmFR2vYKrOmFhupMIn/hyB6lYCCTXz4yaQX89XVg=" \
+    indir "${EXAMPLES_DIR}/diesel" $CARGO test --workspace $@
+}
 
 function test_default() {
+  FEATURES=(
+    tls
+    mtls
+    secrets
+    json
+    msgpack
+    uuid
+    private-cookies
+    serde
+    deadpool_postgres
+    deadpool_redis
+    sqlx_mysql
+    sqlx_postgres
+    sqlx_mssql
+    sqlx_macros
+    postgres_pool
+    memcache_pool
+    tera
+    handlebars
+  )
+  COMPATIBLE_FEATURES=(
+    sqlx_sqlite
+    sqlite_pool
+    diesel_postgres_pool
+    diesel_mysql_pool
+  )
+  DIESEL_SQLITE_FEATURES=(
+    diesel_sqlite_pool
+  )
+
+  compatible_features=$(printf ",%s" "${FEATURES[@]}")
+  compatible_features=${compatible_features:1}
+  all_compatible_features="$compatible_features"
+  for feature in "${COMPATIBLE_FEATURES[@]}"; do
+   all_compatible_features="$all_compatible_features,$feature"
+  done
   echo ":: Building and testing core libraries..."
-  indir "${PROJECT_ROOT}" $CARGO test --all --all-features $@
+  indir "${PROJECT_ROOT}" $CARGO test --workspace --features $all_compatible_features \
+      --exclude rocket_guide_tests --exclude rocket_sync_db_pools_codegen_diesel_tests $@
+
+  echo ":: Building and testing rocket_guide_tests (diesel-sqlite)..."
+  indir "${PROJECT_ROOT}" $CARGO test -p rocket_guide_tests --all-features $@
+  echo ":: Building and testing rocket_sync_db_pools_codegen_diesel_tests (diesel-sqlite)..."
+  indir "${PROJECT_ROOT}" $CARGO test -p rocket_sync_db_pools_codegen_diesel_tests --all-features $@
 
   echo ":: Checking benchmarks..."
   indir "${BENCHMARKS_ROOT}" $CARGO update
@@ -155,7 +221,7 @@ function test_default() {
 
   echo ":: Checking fuzzers..."
   indir "${FUZZ_ROOT}" $CARGO update
-  indir "${FUZZ_ROOT}" $CARGO check --all --all-features $@
+  indir "${FUZZ_ROOT}" $CARGO check --workspace --all-features $@
 }
 
 function run_benchmarks() {
@@ -163,11 +229,6 @@ function run_benchmarks() {
   indir "${BENCHMARKS_ROOT}" $CARGO update
   indir "${BENCHMARKS_ROOT}" $CARGO bench $@
 }
-
-if [[ $1 == +* ]]; then
-  CARGO="$CARGO $1"
-  shift
-fi
 
 # The kind of test we'll be running.
 TEST_KIND="default"

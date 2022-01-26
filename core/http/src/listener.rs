@@ -39,7 +39,7 @@ pub struct RawCertificate(pub Vec<u8>);
 // NOTE: `rustls::Certificate` is exactly isomorphic to `RawCertificate`.
 #[doc(inline)]
 #[cfg(feature = "tls")]
-pub use rustls::Certificate as RawCertificate;
+pub use tokio_rustls::rustls::Certificate as RawCertificate;
 
 /// A 'Connection' represents an open connection to a client
 pub trait Connection: AsyncRead + AsyncWrite {
@@ -54,6 +54,9 @@ pub trait Connection: AsyncRead + AsyncWrite {
     ///
     /// Defaults to an empty vector to indicate that no certificates were
     /// presented.
+    ///
+    /// Supported only with feature `tls`.
+    #[cfg(feature = "tls")]
     fn peer_certificates(&self) -> Option<Vec<RawCertificate>> { None }
 }
 
@@ -167,12 +170,9 @@ impl<L: Listener> Accept for Incoming<L> {
 /// The delay is useful to handle resource exhaustion errors like ENFILE
 /// and EMFILE. Otherwise, could enter into tight loop.
 fn is_connection_error(e: &io::Error) -> bool {
-    match e.kind() {
-        io::ErrorKind::ConnectionRefused |
+    matches!(e.kind(), io::ErrorKind::ConnectionRefused |
         io::ErrorKind::ConnectionAborted |
-        io::ErrorKind::ConnectionReset => true,
-        _ => false,
-    }
+        io::ErrorKind::ConnectionReset)
 }
 
 impl<L: fmt::Debug> fmt::Debug for Incoming<L> {

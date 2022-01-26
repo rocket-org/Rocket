@@ -17,21 +17,22 @@ is configured with. This means that no matter which configuration provider
 Rocket is asked to use, it must be able to read the following configuration
 values:
 
-| key            | kind              | description                                     | debug/release default   |
-|----------------|-------------------|-------------------------------------------------|-------------------------|
-| `address`      | `IpAddr`          | IP address to serve on                          | `127.0.0.1`             |
-| `port`         | `u16`             | Port to serve on.                               | `8000`                  |
-| `workers`      | `usize`           | Number of threads to use for executing futures. | cpu core count          |
-| `ident`        | `string`, `false` | If and how to identify via the `Server` header. | `"Rocket"`              |
-| `keep_alive`   | `u32`             | Keep-alive timeout seconds; disabled when `0`.  | `5`                     |
-| `log_level`    | [`LogLevel`]      | Max level to log. (off/normal/debug/critical)   | `normal`/`critical`     |
-| `cli_colors`   | `bool`            | Whether to use colors and emoji when logging.   | `true`                  |
-| `secret_key`   | [`SecretKey`]     | Secret key for signing and encrypting values.   | `None`                  |
-| `tls`          | [`TlsConfig`]     | TLS configuration, if any.                      | `None`                  |
-| `limits`       | [`Limits`]        | Streaming read size limits.                     | [`Limits::default()`]   |
-| `limits.$name` | `&str`/`uint`     | Read limit for `$name`.                         | forms = "32KiB"         |
-| `ctrlc`        | `bool`            | Whether `ctrl-c` initiates a server shutdown.   | `true`                  |
-| `shutdown`     | [`Shutdown`]      | Graceful shutdown configuration.                | [`Shutdown::default()`] |
+| key                     | kind              | description                                              | debug/release default   |
+|-------------------------|-------------------|----------------------------------------------------------|-------------------------|
+| `address`               | `IpAddr`          | IP address to serve on                                   | `127.0.0.1`             |
+| `port`                  | `u16`             | Port to serve on.                                        | `8000`                  |
+| `workers`               | `usize`           | Number of threads to use for executing futures.          | cpu core count          |
+| `blocking_workers`      | `usize`           | Number of threads to use for executing blocking futures. | 512                     |
+| `ident`                 | `string`, `false` | If and how to identify via the `Server` header.          | `"Rocket"`              |
+| `keep_alive`            | `u32`             | Keep-alive timeout seconds; disabled when `0`.           | `5`                     |
+| `log_level`             | [`LogLevel`]      | Max level to log. (off/normal/debug/critical)            | `normal`/`critical`     |
+| `cli_colors`            | `bool`            | Whether to use colors and emoji when logging.            | `true`                  |
+| `secret_key`            | [`SecretKey`]     | Secret key for signing and encrypting values.            | `None`                  |
+| `tls`                   | [`TlsConfig`]     | TLS configuration, if any.                               | `None`                  |
+| `limits`                | [`Limits`]        | Streaming read size limits.                              | [`Limits::default()`]   |
+| `limits.$name`          | `&str`/`uint`     | Read limit for `$name`.                                  | form = "32KiB"         |
+| `ctrlc`                 | `bool`            | Whether `ctrl-c` initiates a server shutdown.            | `true`                  |
+| `shutdown`              | [`Shutdown`]      | Graceful shutdown configuration.                         | [`Shutdown::default()`] |
 
 ### Profiles
 
@@ -106,12 +107,12 @@ file might look like:
 ## defaults for _all_ profiles
 [default]
 address = "0.0.0.0"
-limits = { forms = "64 kB", json = "1 MiB" }
+limits = { form = "64 kB", json = "1 MiB" }
 
 ## set only when compiled in debug mode, i.e, `cargo build`
 [debug]
 port = 8000
-## only the `json` key from `default` will be overridden; `forms` will remain
+## only the `json` key from `default` will be overridden; `form` will remain
 limits = { json = "10MiB" }
 
 ## set only when the `nyc` profile is selected
@@ -135,6 +136,7 @@ sensible.
 address = "127.0.0.1"
 port = 8000
 workers = 16
+blocking_workers = 512
 keep_alive = 5
 ident = "Rocket"
 log_level = "normal"
@@ -144,7 +146,7 @@ cli_colors = true
 secret_key = "hPRYyVRiMyxpw5sBB1XeCMN1kFsDCqKvBi2QJxBVHQk="
 
 [default.limits]
-forms = "64 kB"
+form = "64 kB"
 json = "1 MiB"
 msgpack = "2 MiB"
 "file/jpg" = "5 MiB"
@@ -179,7 +181,7 @@ ROCKET_IDENT=Rocket
 ROCKET_IDENT="Hello Rocket"
 ROCKET_IDENT=false
 ROCKET_TLS={certs="abc",key="foo/bar"}
-ROCKET_LIMITS={forms="64 KiB"}
+ROCKET_LIMITS={form="64 KiB"}
 ```
 
 ### Secret Key
@@ -208,7 +210,7 @@ key corresponds to a data type and each value corresponds to the maximum size in
 bytes Rocket should accept for that type. Rocket can parse both integers
 (`32768`) or SI unit based strings (`"32KiB"`) as limits.
 
-By default, Rocket specifies a `32 KiB` limit for incoming forms. Since Rocket
+By default, Rocket specifies a `32 KiB` limit for incoming form(s). Since Rocket
 requires specifying a read limit whenever data is read, external data guards may
 also choose to have a configure limit via the `limits` parameter. The
 [`Json`](@api/rocket/serde/json/struct.Json.html) type, for instance, uses the
@@ -337,6 +339,15 @@ configuration value cannot be reconfigured or be configured from sources other
 than those provided by [`Config::figment()`]. In other words, only the values
 set by the `ROCKET_WORKERS` environment variable or in the `workers` property of
 `Rocket.toml` will be considered - all other `workers` values are ignored.
+
+The `blocking_workers` parameter sets the maximum number of threads tokio will
+spawn to execute futures spawned with `spawn_blocking`. Similar to the `workers`
+parameter, this cannot be reconfigured. The runtime will only spawn these threads
+if there are futures to execute on them, and leaving this at it's default value
+is generally prefered. Rocket rarely spawns any of these, so running into the limit
+is unlikely, although in some situations the OS will limit the number of threads
+Rocket can spawn. In these situations, either the OS limit needs to be raised or
+the Rocket limit needs to be lowered.
 
 ## Extracting Values
 

@@ -67,10 +67,10 @@ fn test_sqlx() {
     test("/sqlx", crate::sqlx::stage())
 }
 
-#[test]
-fn test_diesel() {
-    test("/diesel", crate::diesel_sqlite::stage())
-}
+// #[test]
+// fn test_diesel() {
+//     test("/diesel", crate::diesel_sqlite::stage())
+// }
 
 #[test]
 fn test_rusqlite() {

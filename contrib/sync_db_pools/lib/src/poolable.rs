@@ -1,5 +1,3 @@
-use std::time::Duration;
-
 use r2d2::ManageConnection;
 use rocket::{Rocket, Build};
 
@@ -119,6 +117,7 @@ impl Poolable for diesel::SqliteConnection {
     type Error = std::convert::Infallible;
 
     fn pool(db_name: &str, rocket: &Rocket<Build>) -> PoolResult<Self> {
+        use std::time::Duration;
         use diesel::{SqliteConnection, connection::SimpleConnection};
         use diesel::r2d2::{CustomizeConnection, ConnectionManager, Error, Pool};
 
@@ -155,6 +154,8 @@ impl Poolable for diesel::PgConnection {
     type Error = std::convert::Infallible;
 
     fn pool(db_name: &str, rocket: &Rocket<Build>) -> PoolResult<Self> {
+        use std::time::Duration;
+
         let config = Config::from(db_name, rocket)?;
         let manager = diesel::r2d2::ConnectionManager::new(&config.url);
         let pool = r2d2::Pool::builder()
@@ -172,6 +173,8 @@ impl Poolable for diesel::MysqlConnection {
     type Error = std::convert::Infallible;
 
     fn pool(db_name: &str, rocket: &Rocket<Build>) -> PoolResult<Self> {
+        use std::time::Duration;
+
         let config = Config::from(db_name, rocket)?;
         let manager = diesel::r2d2::ConnectionManager::new(&config.url);
         let pool = r2d2::Pool::builder()
@@ -190,6 +193,8 @@ impl Poolable for postgres::Client {
     type Error = postgres::Error;
 
     fn pool(db_name: &str, rocket: &Rocket<Build>) -> PoolResult<Self> {
+        use std::time::Duration;
+
         let config = Config::from(db_name, rocket)?;
         let url = config.url.parse().map_err(Error::Custom)?;
         let manager = r2d2_postgres::PostgresConnectionManager::new(url, postgres::tls::NoTls);
@@ -208,6 +213,7 @@ impl Poolable for rusqlite::Connection {
     type Error = std::convert::Infallible;
 
     fn pool(db_name: &str, rocket: &Rocket<Build>) -> PoolResult<Self> {
+        use std::time::Duration;
         use rocket::figment::providers::Serialized;
 
         #[derive(Debug, serde::Deserialize, serde::Serialize)]
@@ -268,6 +274,8 @@ impl Poolable for memcache::Client {
     type Error = memcache::MemcacheError;
 
     fn pool(db_name: &str, rocket: &Rocket<Build>) -> PoolResult<Self> {
+        use std::time::Duration;
+
         let config = Config::from(db_name, rocket)?;
         let manager = r2d2_memcache::MemcacheConnectionManager::new(&*config.url);
         let pool = r2d2::Pool::builder()

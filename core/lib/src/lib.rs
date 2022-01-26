@@ -29,7 +29,7 @@
 //!
 //! ```toml
 //! [dependencies]
-//! rocket = "0.5.0-rc.1"
+//! rocket = "0.5.0-rc.2"
 //! ```
 //!
 //! <small>Note that development versions, tagged with `-dev`, are not published
@@ -59,20 +59,21 @@
 //! To avoid compiling unused dependencies, Rocket gates certain features, all
 //! of which are disabled by default:
 //!
-//! | Feature   | Description                                             |
-//! |-----------|---------------------------------------------------------|
-//! | `secrets` | Support for authenticated, encrypted [private cookies]. |
-//! | `tls`     | Support for [TLS] encrypted connections.                |
-//! | `mtls`    | Support for verified clients via [mutual TLS].          |
-//! | `json`    | Support for [JSON (de)serialization].                   |
-//! | `msgpack` | Support for [MessagePack (de)serialization].            |
-//! | `uuid`    | Support for [UUID value parsing and (de)serialization]. |
+//! | Feature           | Description                                             |
+//! |-------------------|---------------------------------------------------------|
+//! | `secrets`         | Support for authenticated, encrypted [private cookies]. |
+//! | `tls`             | Support for [TLS] encrypted connections.                |
+//! | `mtls`            | Support for verified clients via [mutual TLS].          |
+//! | `json`            | Support for [JSON (de)serialization].                   |
+//! | `msgpack`         | Support for [MessagePack (de)serialization].            |
+//! | `msgpack-compact` | Support for compact [MessagePack (de)serialization].    |
+//! | `uuid`            | Support for [UUID value parsing and (de)serialization]. |
 //!
 //! Features can be selectively enabled in `Cargo.toml`:
 //!
 //! ```toml
 //! [dependencies]
-//! rocket = { version = "0.5.0-rc.1", features = ["secrets", "tls", "json"] }
+//! rocket = { version = "0.5.0-rc.2", features = ["secrets", "tls", "json"] }
 //! ```
 //!
 //! [JSON (de)serialization]: crate::serde::json
@@ -232,6 +233,7 @@ pub fn async_main<R>(fut: impl std::future::Future<Output = R> + Send) -> R {
     // See tokio-rs/tokio#3329 for a necessary solution in `tokio`.
     tokio::runtime::Builder::new_multi_thread()
         .worker_threads(Config::from(Config::figment()).workers)
+        .max_blocking_threads(Config::from(Config::figment()).blocking_workers)
         // NOTE: graceful shutdown depends on the "rocket-worker" prefix.
         .thread_name("rocket-worker-thread")
         .enable_all()

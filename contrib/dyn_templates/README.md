@@ -35,6 +35,7 @@ supports [Handlebars] and [Tera].
      last two extensions**:
 
      ```rust
+     use std::collections::HashMap;
      use rocket_dyn_templates::Template;
 
      #[launch]
@@ -44,6 +45,7 @@ supports [Handlebars] and [Tera].
 
      #[get("/")]
      fn index() -> Template {
+         let context: HashMap<&str, &str> = HashMap::new();
          Template::render("template-name", &context)
      }
      ```
